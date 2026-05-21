@@ -465,3 +465,64 @@ Trước khi kết chương/phần/tập, hỏi:
 - Quan hệ nào đổi trạng thái?
 - Luật nào bị phá hoặc được lập?
 - Người nghe sẽ muốn nghe tiếp vì sợ gì, tò mò gì, hay thương ai?
+
+## 16. Engine Truyện Hot: Lời Hứa, Móc Câu, Giữ Chân
+
+Dùng khi cần làm truyện cuốn hơn cho video/serial.
+
+### Lời Hứa 1 Câu
+
+Trước khi viết một tập, phải nói được lời hứa trong một câu:
+
+- "Một cô gái chết vì phóng xạ sống lại, nhặt rác đổi tinh thạch để cứu một lính đánh thuê sụp gen."
+- "Một nhóm bị thành bỏ rơi dựng đường nước riêng bằng đồ phế thải và lõi thú biến dị."
+- "Người đàn ông không đứng được lại là người duy nhất nghe ra bẫy của Hắc Nha."
+
+Nếu lời hứa không rõ, tập dễ loãng.
+
+### 4 Móc Câu Mở Đầu
+
+1. **Móc thân phận**: nhân vật bị ép xuống đáy.
+2. **Móc vật phẩm**: một món nhỏ có giá trị bất thường.
+3. **Móc thời gian**: còn bao lâu trước khi chết/mất cơ hội.
+4. **Móc đạo đức**: cứu người thì mất cơ hội, bỏ người thì mất mình.
+
+Một mở đầu mạnh nên có ít nhất 2 trong 4 móc này.
+
+### Chu Kỳ Giữ Chân 10 Phút Audio
+
+Trong mỗi 10 phút nghe, nên có:
+
+- một vật/cảnh cụ thể để bám;
+- một câu hỏi thực dụng;
+- một thay đổi nhỏ về quan hệ hoặc tình thế;
+- một phần thưởng hoặc cảnh báo.
+
+Ví dụ:
+
+- vật: bình lọc cũ;
+- câu hỏi: lọc được nước hay chỉ lọc ra độc?
+- thay đổi: Tần Dã tin Lâm Tịch đủ để đưa dao;
+- phần thưởng/cảnh báo: nước trong hơn, nhưng có mùi kim loại lạ.
+
+### Chu Kỳ Giữ Chân 1 Phần Lớn
+
+Mỗi phần lớn nên có:
+
+1. **Mồi câu thương mại**: tên phần hứa vật/mốc rõ.
+2. **Nâng cấp đời sống**: có thứ giúp sống tốt hơn.
+3. **Xung đột người**: ai đó ghen, ép, xin, phản đối.
+4. **Xung đột môi trường**: phóng xạ, thú, bão, độc, thiếu.
+5. **Xung đột luật**: giấy, thẻ, trạm, thuế, hợp đồng.
+6. **Mở tập sau**: thắng xong bị hệ thống chú ý.
+
+### Bảng Kiểm Hotness
+
+Trước khi chọn một tình tiết, hỏi:
+
+- Nghe tên tình tiết có muốn bấm vào không?
+- Có vật trung tâm đủ cụ thể không?
+- Nhân vật yếu thắng bằng gì ngoài may mắn?
+- Người nghe có thể đếm tiến độ không?
+- Tình tiết này làm ai ghen/ghét/sợ/nợ?
+- Sau khi thắng, thế giới có phản ứng không?

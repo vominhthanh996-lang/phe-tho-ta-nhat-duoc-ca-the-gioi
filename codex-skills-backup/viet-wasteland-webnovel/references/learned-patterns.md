@@ -178,3 +178,59 @@ Từ khóa xuất hiện dày trong 100 chương: cá, điểm tích lũy, phón
 - Phản diện của Lâm Tịch không nên toàn là "ác nhân cầm dao". Nên có kiểu người nói đạo lý: quan nước bảo cô nộp quyền lọc vì "ổn định khu dân"; thương nhân ép mua lõi thú vì "cô giữ cũng chết"; hàng xóm xin nước rồi tố cô tích trữ.
 - Căn cứ nhỏ/đường nước của Chim Xám sau này phải bị tranh bằng giấy tờ, dư luận, giá thuế, quy định vệ sinh, không chỉ bằng bạo lực.
 - Tần Dã có thể nhận ra những cái bẫy hợp đồng/căn cứ vì Hắc Nha từng dùng đúng loại ngôn ngữ đó để biến lính thành tài sản.
+
+## Khảo Sát Truyện Hot Mạt Thế/Sinh Tồn Trên Biển Truyện
+
+- **Nguồn học**: trang chủ/tìm kiếm Biển Truyện và kết quả web công khai. Các truyện nổi bật gồm Hạ Thanh, Khương Vân Đàn, Khương Tiểu Ngư, Trần Dã, Sở Từ, Lâm Sơ, Khương Vưu, Hàn Thanh Hạ, một số truyện ngự thú/sinh tồn/lãnh chúa.
+- **Mục tiêu học**: không học câu chữ cụ thể, mà học "lời hứa thương mại" của truyện hot: vì sao người nghe bấm vào, nghe tiếp, và quay lại.
+
+### Công Thức Lời Hứa Của Truyện Hot
+
+Truyện hot thường nói rõ ngay trong tên/mô tả:
+
+- **Thân phận bị đè**: kẻ yếu nhất, bị bỏ rơi, bị gia đình hại, nghèo, mắc nợ, không có tên trong sổ.
+- **Cơ chế đổi đời**: nhặt rác thành báu, trồng trọt ngoài khu an toàn, xây pháo đài, nâng cấp xe, thu thập vạn vật, tích trữ vật tư.
+- **Mục tiêu vật chất**: mua nhà, có lãnh địa, có căn cứ, có kho, có xe, có nước, có đồ ăn, có thẻ cư trú.
+- **Tính cách nhân vật chính**: nữ cường, không thánh mẫu, tâm đen tay ác vừa đủ, biết tính toán, biết trả giá.
+- **Không khí sảng**: người từng khinh thường phải nhìn lại, vật vô dụng hóa quý, người yếu có chỗ đứng.
+
+### Bài Học Về Tên Truyện/Tên Tập
+
+Tên truyện hot thường dài nhưng hiệu quả vì chứa đủ 3 câu trả lời:
+
+- **Ai?** Một người bị đẩy xuống đáy.
+- **Làm gì?** Nhặt, trồng, tích, xây, nâng cấp, báo thù, rời khu an toàn.
+- **Được gì?** Nhà, pháo đài, lãnh địa, vật tư, báu vật, quyền sống.
+
+Cho truyện của mình, tên phần/tập nên học tinh thần này:
+
+- "Lâm Tịch - Ba Mươi Sáu Giờ Kiếm Thuốc Cho Người Sụp Gen"
+- "Chim Xám - Một Bình Lọc Cũ Đổi Lấy Đường Nước Riêng"
+- "Phế Thổ - Lõi Thú Không Ăn Được Nhưng Cả Thành Muốn Mua"
+- "Tần Dã - Người Không Đứng Được Lại Nghe Ra Bẫy Của Hắc Nha"
+
+### Bài Học Về Mở Đầu Truyện Hot
+
+Mở đầu thường làm 4 việc rất nhanh:
+
+1. **Đặt người chính vào thế bị ép**: đói, bệnh, nợ, bị đuổi, bị phản bội, không có quyền chọn.
+2. **Cho một ký ức/lợi thế nhỏ**: xuyên không, trọng sinh, kinh nghiệm, nghề cũ, may mắn, kiến thức.
+3. **Đặt mục tiêu vật chất**: sống qua đêm, mua thuốc, lấy nhà, gom vật tư, ra khỏi khu an toàn.
+4. **Cho cú phản kháng đầu tiên**: không ký giấy, không giao nhà, không chia nước, không bỏ người, không để mình bị bán.
+
+### Bài Học Về Giữ Người Nghe
+
+- **Mỗi 5-10 phút phải có một "được" nhỏ**: biết thêm luật, lấy được vật, thắng một câu mặc cả, phát hiện dấu thú, đổi được thuốc.
+- **Mỗi 20-30 phút phải có một quyết định khó**: cứu hay không, bán hay giữ, giấu hay khai, vào thành hay quay lại.
+- **Mỗi phần lớn phải có một nâng cấp nhìn thấy được**: giường khô, bình lọc, đường nước, xe kéo, kho nhỏ, thuốc ổn định gen, chốt gác.
+- **Mỗi tập phải đổi vị thế nhân vật**: từ người xin nước thành người giữ nước; từ người bị đuổi thành người có cửa khóa; từ nhóm nhặt rác thành nhóm có luật.
+
+### Cách Chuyển Hóa Cho Truyện Mình
+
+- Đẩy mạnh "lời hứa" của Lâm Tịch: không phải bá đạo, mà là người nghèo nhất phế thổ nhặt từng món để mua quyền sống, rồi dần xây luật nước riêng.
+- Mỗi tập nên có tagline rõ để chạy video YouTube:
+  - Tập 1: Xuyên vào thân xác chết vì phóng xạ, cô nhặt được hộp thịt và một người lính sụp gen.
+  - Tập 2: Đường ray phía nam không dẫn về nhà, nhưng dẫn tới bản đồ sống.
+  - Tập 3: Vào được trong tường, cô phát hiện nước sạch cũng có chủ.
+  - Tập 4: Một đường nước nhỏ khiến cả khu dân nghèo nhìn thấy hy vọng.
+  - Tập 5: Khi bể lọc đầu tiên chảy nước, Hắc Nha cũng tìm thấy Tần Dã.

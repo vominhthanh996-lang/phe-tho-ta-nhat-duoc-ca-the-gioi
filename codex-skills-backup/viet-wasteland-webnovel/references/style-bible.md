@@ -48,6 +48,14 @@ Dùng khi truyện chuyển từ "sống qua ngày" sang "dựng nơi để số
 - **Tình cảm nằm trong sắp đặt đồ vật**: dao đặt đúng bên thuận tay, nước để thấp hơn để người liệt với tới, phần cháo đặc hơn bị đẩy sang bát người khác.
 - **Cao trào đội nhóm nên có hậu âm**: sau cãi nhau chia vật tư, đừng chuyển cảnh ngay. Cho một người nhặt lại mẩu dây, một người im lặng vá túi, một người không uống phần nước của mình.
 
+## Hành Văn Truyện Hot Cho Audio
+
+- **Câu đầu của cảnh phải có lực kéo**: đau, thiếu, vật lạ, tiếng động, quyết định, hoặc thời hạn.
+- **Không để 3 đoạn liên tiếp chỉ giải thích**: sau giải thích phải có hành động, đồ vật, thoại, hoặc cảm giác thân thể.
+- **Mỗi cảnh nên có một câu "nghe là nhớ"**: ngắn, rõ, gắn với chủ đề. Ví dụ: "Nước sạch không tự chảy về phía người nghèo."
+- **Tên phần/tên chương phải bán phần thưởng hoặc nguy cơ**: người nghe chưa bấm vẫn hiểu chương này đáng nghe vì cái gì.
+- **Sảng điểm phải có dư âm người**: sau khi nhặt được đồ quý, cho ai đó nhìn thấy, thèm, sợ, ghen, hoặc im lặng nhường phần.
+
 Good texture:
 
 - "mùi kim loại gỉ", "nước vàng", "bụi đỏ", "vải ẩm", "đèn mỡ", "cốc nước có vạch";
