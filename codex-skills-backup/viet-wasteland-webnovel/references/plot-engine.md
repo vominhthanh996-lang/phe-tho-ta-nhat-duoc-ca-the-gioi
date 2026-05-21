@@ -217,3 +217,130 @@ Tiêu đề nên cho người nghe thấy ngay nguy cơ:
 - "Chợ Đen Đóng Trước Nửa Đêm"
 - "Một Lõi Thú, Hai Mạng Người"
 - "Cổng Thành Không Mở Lần Hai"
+
+## 11. Engine Đội Nhóm Và Phân Phối Vật Tư
+
+Dùng khi muốn Chim Xám sống như một đội thật, không phải dàn nhân vật đứng quanh nữ chính.
+
+### Luật Đội Trước Tình Cảm
+
+Một đội sinh tồn phải có luật rõ:
+
+1. **Ai giữ nước?**
+2. **Ai giữ thuốc?**
+3. **Ai giữ tinh thạch/tài sản chung?**
+4. **Ai quyết định nhận người mới?**
+5. **Ai gác đêm?**
+6. **Ai có quyền ra lệnh khi Lâm Tịch vắng mặt?**
+7. **Nếu có người phản bội, xử thế nào?**
+
+Luật càng rõ, khi bị phá mới càng đau.
+
+### Phân Phối Là Cao Trào
+
+Sau mỗi lần săn thú, nhặt kho, đổi hàng, phải hỏi:
+
+- phần nào dùng ngay;
+- phần nào bán;
+- phần nào giữ cho Tần Dã;
+- phần nào chia cho trẻ con/người yếu;
+- phần nào làm quỹ chung;
+- ai thấy mình bị thiệt;
+- ai âm thầm nhường nhưng không nói.
+
+Một cảnh chia vật tư tốt có thể tạo:
+
+- mâu thuẫn;
+- cảm động;
+- ghen tị;
+- luật mới;
+- phản bội về sau.
+
+### Vai Trò Đội
+
+Mỗi người cần công dụng riêng:
+
+- **Lâm Tịch**: quyết định, tính toán, chịu tiếng xấu khi cần.
+- **Tần Dã**: chiến thuật, phát hiện bẫy, đọc dấu quân sự/faction.
+- **Di Mạn**: khẩu phần, bếp, sức khỏe, đạo đức thực tế.
+- **A Thất**: tin tức, mặc cả, nói điều xấu trước.
+- **Mộc Sanh**: sửa máy, bẫy, giấu cảm xúc bằng tay nghề.
+- **Ninh**: câu hỏi đạo đức, cây/hạt giống, nhắc đội đừng thành kẻ cướp.
+
+Không để ai chỉ là người khen nữ chính.
+
+### Công Thức Nhận Người Mới
+
+1. Người mới mang theo một giá trị.
+2. Người mới mang theo một rủi ro.
+3. Trong đội có người muốn nhận, người muốn bỏ.
+4. Lâm Tịch quyết định và trả giá.
+5. Về sau người mới phải tạo ít nhất một biến cố, tốt hoặc xấu.
+
+## 12. Engine Phản Diện Và Faction
+
+Dùng để viết Hắc Nha, trạm lọc, thành nội, thương nhân, đội quản lý cư trú.
+
+### Phản Diện Không Tự Nhận Là Ác
+
+Mỗi faction nên có:
+
+- **Lý do tồn tại**: bảo vệ thành, duy trì nước, nghiên cứu gen, ổn định giá, thu gom thú biến dị.
+- **Lợi ích thật**: quyền lực, mẫu gen, tinh thạch, lao động, danh nghĩa hợp pháp.
+- **Ngôn ngữ đạo lý**: "vì ổn định", "vì người dân", "vì an toàn", "theo quy định".
+- **Cách ép người yếu**: giấy tờ, nợ, hợp đồng, nước, thuốc, kiểm tra, lời đồn.
+- **Một người đại diện có mặt người**: không phải ai trong faction cũng xấu; có người mệt, có người tin mình đang làm đúng.
+
+### Cấp Độ Xung Đột Faction
+
+1. **Nhắc tên**: người ta sợ hoặc cần faction đó.
+2. **Dấu hiệu**: logo, thẻ, lệnh, vết thương, giá hàng.
+3. **Va chạm nhỏ**: kiểm tra, ép giá, hỏi giấy.
+4. **Ép lựa chọn**: nộp lõi thú, ký hợp đồng, giao người.
+5. **Trả đũa mềm**: cắt nước, lan tin, tăng thuế, hủy giấy.
+6. **Trả đũa cứng**: bắt người, săn lùng, thử nghiệm, phá căn cứ.
+7. **Lộ sự thật**: faction cũng sợ một thứ lớn hơn.
+
+### Phản Diện Gần
+
+Phản diện đau nhất có thể là:
+
+- người từng được cứu nhưng tố cáo đội;
+- người xin nước rồi đòi quyền chia;
+- hàng xóm dùng đạo lý để cướp;
+- quan chức tốt bụng nhưng ký lệnh xấu;
+- lính Hắc Nha cũ từng là đồng đội Tần Dã.
+
+## 13. Engine Tình Cảm Chậm
+
+Dùng cho Lâm Tịch và Tần Dã.
+
+Tình cảm không nên bắt đầu bằng lời yêu. Nó bắt đầu bằng:
+
+1. **Nợ**: cô cứu anh, anh chỉ đường cho cô sống.
+2. **Thói quen**: cô để nước bên tay anh, anh để dao ở chỗ cô với tới.
+3. **Tin cậy thực dụng**: giao lưng, giao thuốc, giao bí mật.
+4. **Ghen im lặng**: không làm ồn, chỉ nhận ra mình khó chịu.
+5. **Sợ mất**: không nói "ta cần ngươi", chỉ nổi giận vì người kia tự làm đau mình.
+6. **Chọn ở lại**: khi có đường tốt hơn nhưng vẫn quay về.
+
+### Cảnh Tình Cảm Không Cần Ngọt
+
+- lau máu mà mắng;
+- chia phần thuốc nhưng nói là tính sai liều;
+- Tần Dã nhớ Lâm Tịch thuận tay trái khi đặt dao;
+- Lâm Tịch đẩy xe qua đoạn xấu rồi giả vờ thở không gấp;
+- một người ngủ, người kia canh mà không kể công.
+
+## 14. Engine Sinh Thái Thú Biến Dị
+
+Mỗi loài thú biến dị cần 6 ô:
+
+1. **Tên dân gian**: người nghèo gọi nó là gì.
+2. **Tập tính**: săn mùi nước, thích kim loại, sợ ánh sáng, ngủ dưới bùn nóng.
+3. **Dấu hiệu xuất hiện**: đất nứt, mùi chua, tiếng móng, côn trùng im.
+4. **Cách nghèo đối phó**: khói, dây, bùn, tiếng gõ, mồi giả, hố.
+5. **Giá trị sau khi hạ**: lõi, da, xương, tuyến lọc, mỡ, răng, máu độc.
+6. **Rủi ro xử lý**: thịt không ăn được, máu ăn mòn, lông gây sốt, lõi kéo faction tới.
+
+Thú hay nhất không chỉ để giết. Nó phải làm lộ luật thế giới và làm thay đổi quan hệ con người.

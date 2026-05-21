@@ -40,6 +40,14 @@ Dùng khi truyện chuyển từ "sống qua ngày" sang "dựng nơi để số
 - **Hài khô vừa đủ**: phế thổ càng nặng càng cần vài nhịp thở. Hài nên đến từ tính người và tình huống sinh tồn, không phá cảm giác nguy hiểm.
 - **Cao trào đời thường phải được viết nghiêm túc**: một trận mưa độc, một hạt không nảy, một cái máy hỏng, một giấy tờ bị giữ cũng có thể căng như đánh nhau nếu nó đe dọa cả nhóm.
 
+## Hành Văn Đội Nhóm Và Faction
+
+- **Mỗi người nói bằng chức năng sống còn của mình**: người giữ bếp hỏi khẩu phần, người sửa máy hỏi linh kiện, người trinh sát hỏi đường rút, người bị thương hỏi thuốc còn bao lâu.
+- **Đừng để đồng đội đồng thanh**: cùng một quyết định phải có người đồng ý vì tình, người đồng ý vì lợi, người phản đối vì sợ, người im lặng vì từng thấy hậu quả.
+- **Viết phản diện bằng ngôn ngữ sạch**: faction nguy hiểm thường nói rất bình tĩnh, rất đúng quy trình. Câu "theo quy định" đôi khi đáng sợ hơn lời chửi.
+- **Tình cảm nằm trong sắp đặt đồ vật**: dao đặt đúng bên thuận tay, nước để thấp hơn để người liệt với tới, phần cháo đặc hơn bị đẩy sang bát người khác.
+- **Cao trào đội nhóm nên có hậu âm**: sau cãi nhau chia vật tư, đừng chuyển cảnh ngay. Cho một người nhặt lại mẩu dây, một người im lặng vá túi, một người không uống phần nước của mình.
+
 Good texture:
 
 - "mùi kim loại gỉ", "nước vàng", "bụi đỏ", "vải ẩm", "đèn mỡ", "cốc nước có vạch";

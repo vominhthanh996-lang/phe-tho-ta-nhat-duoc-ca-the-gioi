@@ -130,3 +130,51 @@ Từ khóa xuất hiện dày trong 100 chương: cá, điểm tích lũy, phón
 - Tích trữ của Lâm Tịch không phải kho vô hạn mà là kho nghèo: nửa túi muối, ba viên lọc, hai mét dây, một tấm da thú, bốn tinh thạch bẩn. Càng nghèo càng phải tính kỹ.
 - Cao trào nên đánh theo tầng: thiếu nước -> tìm nguồn -> nguồn có thú -> thú có lõi -> lõi bị Hắc Nha nhận ra -> muốn bán lõi phải vào chợ đen -> chợ đen có người quen của Tần Dã.
 - Tiêu đề phần/chương sau có thể sắc hơn: "Ba Mươi Sáu Giờ Thuốc", "Bình Lọc Không Được Rơi", "Bão Bụi Đỏ Đến Sớm", "Lõi Thú Mang Dấu Hắc Nha", "Cái Giá Của Một Chỗ Ngủ Khô".
+
+## Tham khảo: Trần Dã - Mạt Thế Sinh Tồn, Từ Kẻ Yếu Nhất Đoàn Xe...
+
+- **Nguồn học**: Biển Truyện, truyện mạt thế đoàn xe/cơ giới/nâng cấp. Có dị năng nên không dùng trực tiếp, nhưng rất hữu ích để học đội nhóm, vật tư chung, luật đoàn và phương tiện như một "nhà di động".
+- **Phạm vi học**: quét tiêu đề và từ khóa 50 chương đầu. Các từ khóa nổi bật: xe, đoàn xe, vật tư, đội, nước, máy, lái, cơ giới, sửa.
+
+### Nhịp 50 Chương Đầu
+
+- **Chương 1-5**: đặt luật sắt của đoàn xe, từ xe đạp/xe ba bánh nhỏ tới cơ chế nâng cấp. Mở bằng luật sinh tồn tập thể: ở trong đoàn thì phải biết mình là ai.
+- **Chương 6-13**: tay sắt, đào tẩu, trao đổi vật tư, người trơ trẽn. Nhịp này dùng xung đột nội bộ để chứng minh luật không phải trang trí.
+- **Chương 15-28**: người sống sót mới, đứa trẻ, kỳ vật, radio nghe lén, siêu thị, vật tư không đủ. Đội nhóm được thử bằng việc có nhận thêm người hay không.
+- **Chương 29-36**: đại đào sát, cứu chị em, cầu xin, chạy trốn. Cao trào đội nhóm: cứu người làm chậm đoàn, nhưng bỏ người lại sẽ đổi bản chất nhân vật.
+- **Chương 37-50**: đoàn xe tái lập, thời tiết cực đoan, phân phối vật tư, nâng cấp xe, chạm trán đoàn khác. Sau cao trào sinh tồn là cao trào quản lý: chia đồ và đối ngoại.
+
+### Quy Luật Craft Rút Ra
+
+- **Đội nhóm cần luật trước tình cảm**: ai canh gác, ai lái, ai sửa, ai chia nước, ai quyết định nhận người mới. Không có luật thì đội chỉ là đám người đi cùng.
+- **Phân phối vật tư là cao trào**: chia nước, thuốc, đồ ăn, đạn, chỗ ngồi trên xe có thể căng hơn đánh nhau vì nó lộ công bằng, thiên vị, nợ và quyền lực.
+- **Phương tiện là nhân vật thứ hai**: xe không chỉ để đi. Xe là nhà, kho, vũ khí, điểm yếu, danh dự, nguồn xung đột.
+- **Người yếu phải có công dụng thật**: một đứa trẻ, người bị thương, người không biết đánh vẫn phải có giá trị: nhớ đường, nghe radio, biết sửa, biết nhận độc, biết thương lượng.
+- **Cứu người phải tạo hậu quả**: cứu thêm người nghĩa là thiếu khẩu phần, thiếu chỗ, chậm đường, bị theo dấu, sinh tranh cãi.
+- **Đối đầu đoàn khác tạo cao trào xã hội**: khi gặp nhóm sinh tồn khác, câu hỏi không chỉ là đánh hay không, mà là đổi gì, giấu gì, liên minh hay lừa.
+
+### Cách Chuyển Hóa Cho "Phế Thổ: Ta Nhặt Được Cả Thế Giới"
+
+- Chim Xám cần luật rõ: ai giữ nước, ai giữ tinh thạch, ai canh Tần Dã, ai được quyền nhận người mới, ai quyết định khi Lâm Tịch vắng mặt.
+- Một phần dài có thể xoay quanh **chia vật tư sau săn thú biến dị**: lõi cho thuốc của Tần Dã, da cho áo cách xạ, xương làm bẫy, thịt không ăn được phải chôn/đổi.
+- Xe lăn/xe kéo cải tạo của Tần Dã có thể trở thành "phương tiện sống": vừa là điểm yếu, vừa là kho giấu, vừa là bẫy, vừa là biểu tượng hồi phục.
+- Đừng để đội chỉ đồng thuận. A Thất có thể muốn bán nhanh, Di Mạn muốn giữ thuốc, Mộc Sanh muốn giữ linh kiện, Ninh hỏi có nên cứu trẻ con không.
+
+## Tham khảo: Hàn Thanh Hạ - Xây Dựng Pháo Đài Bất Bại Và Tích Trữ Vật Tư
+
+- **Nguồn học**: Biển Truyện, truyện trọng sinh trước tận thế/xây căn cứ/pháo đài/tích trữ. Có hệ thống/không gian nên không dùng trực tiếp. Dùng để học động lực phản bội, quyền sở hữu nhà/căn cứ, và cách biến người thân/hệ thống xã hội thành phản diện gần.
+- **Phạm vi học**: trang chương đọc được nhưng dữ liệu nhúng gây nhiễu khi thống kê; dùng phần mở đầu và mô tả công khai để rút craft.
+
+### Quy Luật Craft Rút Ra
+
+- **Phản diện gần đau hơn phản diện xa**: người thân, hàng xóm, người từng được cứu, cấp trên từng tin tưởng. Họ không cần quá mạnh; họ làm đau vì họ biết nhân vật thiếu gì.
+- **Chiếm nhà/căn cứ là xung đột rất mạnh**: trong mạt thế, một căn phòng khô, một cửa khóa, một thùng nước chính là mạng sống. Ai đòi "mượn tạm" cũng có thể là kẻ cướp dưới lớp đạo lý.
+- **Phản diện hay dùng lời đạo đức**: "vì gia đình", "vì tập thể", "vì người yếu", "cô ích kỷ". Cách này hợp với trạm lọc, thành nội, đội quản lý cư trú.
+- **Căn cứ càng chắc càng kéo tới chính trị**: người ta không chỉ phá cửa; họ muốn hợp thức hóa, thu phí, xin bảo hộ, cài người, ép ký hợp đồng.
+- **Động lực trả giá phải có vết cũ**: nhân vật lạnh không phải vì ngầu, mà vì từng trả giá khi mềm lòng sai chỗ.
+
+### Cách Chuyển Hóa Cho "Phế Thổ: Ta Nhặt Được Cả Thế Giới"
+
+- Phản diện của Lâm Tịch không nên toàn là "ác nhân cầm dao". Nên có kiểu người nói đạo lý: quan nước bảo cô nộp quyền lọc vì "ổn định khu dân"; thương nhân ép mua lõi thú vì "cô giữ cũng chết"; hàng xóm xin nước rồi tố cô tích trữ.
+- Căn cứ nhỏ/đường nước của Chim Xám sau này phải bị tranh bằng giấy tờ, dư luận, giá thuế, quy định vệ sinh, không chỉ bằng bạo lực.
+- Tần Dã có thể nhận ra những cái bẫy hợp đồng/căn cứ vì Hắc Nha từng dùng đúng loại ngôn ngữ đó để biến lính thành tài sản.
