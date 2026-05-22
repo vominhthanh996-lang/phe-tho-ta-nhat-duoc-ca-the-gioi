@@ -1,12 +1,17 @@
-name: Daily Webnovel Craft Research
+name: Webnovel Craft Auto Learning
 
 on:
   schedule:
-    # 18:20 ICT (UTC+7) = 11:20 UTC, chạy mỗi ngày
-    - cron: '20 11 * * *'
-    # Sau đó mỗi 5 tiếng
-    - cron: '20 16,21,2,7 * * *'
+    # GitHub Actions minimum schedule interval is 5 minutes.
+    - cron: '*/5 * * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: webnovel-craft-auto-learning
+  cancel-in-progress: false
 
 jobs:
   craft-research:
@@ -14,8 +19,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Run placeholder note
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run craft learning batch
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
         run: |
-          echo "Scheduled craft-learning run at $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          echo "Only research from public/legal sources; no demo, no main-story edits." 
+          python scripts/craft_learning_batch.py
+
+      - name: Commit research updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research
+          if git diff --cached --quiet; then
+            echo "No research changes to commit."
+          else
+            git commit -m "Auto learn webnovel craft"
+            git push
+          fi

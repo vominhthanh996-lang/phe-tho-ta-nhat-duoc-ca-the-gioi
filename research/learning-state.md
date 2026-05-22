@@ -42,7 +42,16 @@
 ## Bổ sung sau khi rà workspace Content truyen
 - Thời gian bổ sung: 2026-05-22 ICT.
 - Đã xác nhận workspace đúng là `E:\ThanhMV\Content truyen`.
-- Đã bổ sung `research/story-upgrade-suggestions.md`.
-- Đã bổ sung `demos/demo-after-learning.md` với demo mở chương khoảng 1.900 từ.
+- Người dùng đã nói rõ không cần demo; demo bổ sung trước đó đã được gỡ khỏi repo.
+- Mục tiêu hiện tại: tự học craft từ nguồn công khai hợp pháp, chạy bằng GitHub Actions mỗi 5 phút.
 - Không sửa Tập 1-3 bản v3.
 - Không chạm vào các file Tập 4 đang có trạng thái bị xoá trong working tree.
+
+## Auto Learning Status
+- Lần chạy gần nhất: 2026-05-22 04:20:58 UTC.
+- Lịch GitHub Actions mong muốn: mỗi 5 phút (`*/5 * * * *`).
+- Nguồn vừa học: Helping Writers Become Authors - Scene Structure (https://www.helpingwritersbecomeauthors.com/scene-structure/).
+- Chế độ học: fallback.
+- Ghi chú batch: `E:/ThanhMV/Content truyen/research/learning-runs/2026-05-22.md`.
+- Quy tắc: không viết demo, không viết chương mới, không sửa nội dung truyện chính, không chép văn nguồn.
+

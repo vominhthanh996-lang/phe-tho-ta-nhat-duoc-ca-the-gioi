@@ -14,7 +14,8 @@ Chỉ học craft viết truyện mạng từ nguồn công khai hợp pháp. **
   - `research/webnovel-craft-lab.md`
   - `research/source-digests.md`
   - `research/skill-upgrade-notes.md`
-- Đã thêm automation lịch chạy định kỳ tại `.github/workflows/daily-craft-research.yml`.
+- Đã cập nhật automation tại `.github/workflows/daily-craft-research.yml` để chạy mỗi 5 phút bằng cron `*/5 * * * *`.
+- Automation chỉ học craft từ nguồn công khai, ghi vào `research/learning-runs/`, cập nhật `research/learning-state.md`, rồi tự commit nếu có thay đổi.
 
 ## Việc cần làm ngay trong phiên sau
 1. Đọc lại nhanh các file research hiện có để tránh trùng lặp insight.
@@ -31,11 +32,11 @@ Chỉ học craft viết truyện mạng từ nguồn công khai hợp pháp. **
    - cập nhật `research/learning-state.md`
    - cập nhật lại file này (`research/NEXT_CODEX_WEB_PROMPT.md`)
    - commit
-   - tạo PR
+   - tạo PR nếu đang làm trên nhánh phụ
    - dừng, không cố viết thêm.
 
 ## Ràng buộc cứng
 - Không bypass paywall, không dùng nguồn lậu/chương khóa.
 - Không sao chép câu chữ nguồn; chỉ rút kỹ thuật.
 - Không tự nâng version.
-- Không merge vào `main`.
+- Không viết demo/chương mới trong batch tự học.
