@@ -2,8 +2,8 @@ name: Webnovel Craft Auto Learning Every 5 Minutes
 
 on:
   schedule:
-    # Every 5 minutes, offset from the busiest 0/5/10 minute marks.
-    - cron: '2-57/5 * * * *'
+    # Every 5 minutes. GitHub may delay scheduled runs, but this is the minimum supported interval.
+    - cron: '*/5 * * * *'
   push:
     branches:
       - main
