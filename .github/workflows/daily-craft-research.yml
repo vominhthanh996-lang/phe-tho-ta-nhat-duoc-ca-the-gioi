@@ -1,16 +1,9 @@
-name: Webnovel Craft Auto Learning Every 30 Minutes
+name: Webnovel Craft Auto Learning Every 5 Minutes
 
 on:
   schedule:
-    # Every 30 minutes. Runs in GitHub Actions, so it works even when the local PC is off.
-    - cron: '*/30 * * * *'
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/daily-craft-research.yml'
-      - 'scripts/craft_learning_batch.py'
-  workflow_dispatch:
+    # Every 5 minutes. Runs in GitHub Actions, so it works even when the local PC is off.
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: write
