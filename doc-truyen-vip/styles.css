@@ -335,6 +335,21 @@ a {
   line-height: 1.55;
 }
 
+.progress-bar {
+  height: 8px;
+  margin: 14px 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--green-2));
+}
+
 .tags {
   display: flex;
   flex-wrap: wrap;
@@ -418,6 +433,36 @@ a {
   display: grid;
   gap: 10px;
   margin-top: 18px;
+}
+
+.chapter-tools {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 12px;
+  margin: 20px 0 8px;
+}
+
+.chapter-tools label {
+  display: grid;
+  gap: 6px;
+}
+
+.chapter-tools span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.chapter-tools select,
+.chapter-tools input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .chapter-row {
@@ -659,7 +704,8 @@ body.reader-dark .reader-content p {
 
   .story-grid,
   .plans-grid,
-  .metrics-grid {
+  .metrics-grid,
+  .chapter-tools {
     grid-template-columns: 1fr;
   }
 

@@ -15,6 +15,13 @@ const els = {
 const storageKey = "doctruyen_vip_state_v1";
 let state = loadState();
 
+function defaultLastRead() {
+  return {
+    storyId: stories[0]?.id || "",
+    chapterId: stories[0]?.chapters[0]?.id || ""
+  };
+}
+
 function loadState() {
   const fallback = {
     user: { name: "Thanh", coins: 18, vipUntil: null },
@@ -22,11 +29,17 @@ function loadState() {
     transactions: [],
     readerSize: 19,
     darkReader: false,
-    lastRead: { storyId: "tan-the-bac-ha", chapterId: "c2" }
+    lastRead: defaultLastRead(),
+    chapterFilters: {}
   };
 
   try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(storageKey) || "{}") };
+    const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+    const merged = { ...fallback, ...saved, user: { ...fallback.user, ...(saved.user || {}) } };
+    if (!getChapter(merged.lastRead?.storyId, merged.lastRead?.chapterId)) {
+      merged.lastRead = defaultLastRead();
+    }
+    return merged;
   } catch {
     return fallback;
   }
@@ -61,35 +74,46 @@ function canRead(storyId, chapter) {
   return chapter.free || isVip() || Boolean(state.unlocked[chapterKey(storyId, chapter.id)]);
 }
 
+function getEpisodeTitle(chapterTitle) {
+  const match = chapterTitle.match(/^(Tập\s+\d+:\s*[^-]+)/i);
+  return match ? match[1].trim() : "Chương lẻ";
+}
+
+function getStoryProgress(story) {
+  const readable = story.chapters.filter((chapter) => canRead(story.id, chapter)).length;
+  return Math.round((readable / story.chapters.length) * 100);
+}
+
 function unlockChapter(storyId, chapter) {
   if (canRead(storyId, chapter)) return true;
   if (state.user.coins < chapter.price) {
-    toast("Khong du xu. Nap them hoac mua VIP de mo chuong.");
+    toast("Không đủ xu. Nạp thêm xu hoặc mua VIP để mở chương.");
     openCheckout("coins_50");
     return false;
   }
+
   state.user.coins -= chapter.price;
   state.unlocked[chapterKey(storyId, chapter.id)] = true;
   state.transactions.unshift({
     id: crypto.randomUUID(),
-    type: "unlock",
-    title: `Mo khoa ${chapter.title}`,
+    type: "Mở chương",
+    title: `Mở khóa ${chapter.title}`,
     amount: -chapter.price,
     createdAt: new Date().toISOString()
   });
   saveState();
-  toast(`Da dung ${chapter.price} xu de mo chuong.`);
+  toast(`Đã dùng ${chapter.price} xu để mở chương.`);
   return true;
 }
 
 function renderAccount() {
   const vipText = isVip()
-    ? `VIP den ${new Date(state.user.vipUntil).toLocaleDateString("vi-VN")}`
-    : "Free";
+    ? `VIP đến ${new Date(state.user.vipUntil).toLocaleDateString("vi-VN")}`
+    : "Tài khoản thường";
   els.account.innerHTML = `
     <span class="status-chip ${isVip() ? "vip" : ""}">${vipText}</span>
     <span class="status-chip">${state.user.coins} xu</span>
-    <button class="btn btn-primary" data-open-checkout="coins_50">Nap xu</button>
+    <button class="btn btn-primary" data-open-checkout="coins_50">Nạp xu</button>
   `;
 }
 
@@ -105,6 +129,7 @@ function setActiveNav(route) {
 
 function storyCard(story) {
   const lockedCount = story.chapters.filter((chapter) => !chapter.free).length;
+  const progress = getStoryProgress(story);
   return `
     <article class="story-card">
       <a href="#/story/${story.id}" class="cover" style="background:${story.cover}">
@@ -114,9 +139,12 @@ function storyCard(story) {
         <div class="tags">${story.genre.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
         <h3>${story.title}</h3>
         <p>${story.summary}</p>
+        <div class="progress-bar" aria-label="Tiến độ mở khóa">
+          <span style="width:${progress}%"></span>
+        </div>
         <div class="card-footer">
-          <span class="muted">${story.chapters.length} chuong · ${lockedCount} VIP</span>
-          <a class="btn btn-secondary" href="#/story/${story.id}">Chi tiet</a>
+          <span class="muted">${story.chapters.length} chương · ${lockedCount} chương VIP</span>
+          <a class="btn btn-secondary" href="#/story/${story.id}">Xem truyện</a>
         </div>
       </div>
     </article>
@@ -124,46 +152,48 @@ function storyCard(story) {
 }
 
 function renderHome() {
-  const featured = stories[0];
-  const lastStory = getStory(state.lastRead.storyId);
-  const lastChapter = getChapter(state.lastRead.storyId, state.lastRead.chapterId);
+  const lastStory = getStory(state.lastRead.storyId) || stories[0];
+  const lastChapter = getChapter(lastStory.id, state.lastRead.chapterId) || lastStory.chapters[0];
+  state.lastRead = { storyId: lastStory.id, chapterId: lastChapter.id };
+  saveState();
+
   els.view.innerHTML = `
     <section class="hero">
       <div class="hero-main">
-        <span class="eyebrow">MVP doc truyen thu phi</span>
-        <h1>Thu vien truyen co paywall, VIP va nap xu.</h1>
-        <p>Ban dau dung payOS/VietQR mock de chay thu. Khi co key that, thay API tao don va webhook la co the charge phi tu doc gia Viet Nam.</p>
+        <span class="eyebrow">Truyện phế thổ đang đăng</span>
+        <h1>Phế Thổ: Ta Nhặt Được Cả Thế Giới</h1>
+        <p>Đọc truyện tiếng Việt có dấu, giao diện dễ đọc, lưu chương đang đọc, mở chương bằng xu hoặc VIP 30 ngày. Thanh toán hiện vẫn là bản mô phỏng payOS/VietQR.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="#/read/${state.lastRead.storyId}/${state.lastRead.chapterId}">Doc tiep</a>
-          <a class="btn btn-secondary" href="#/library">Xem thu vien</a>
-          <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP 30 ngay</button>
+          <a class="btn btn-primary" href="#/read/${lastStory.id}/${lastChapter.id}">Đọc tiếp</a>
+          <a class="btn btn-secondary" href="#/story/${lastStory.id}">Danh sách chương</a>
+          <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP 30 ngày</button>
         </div>
       </div>
-      <aside class="panel">
-        <span class="eyebrow">Dang doc</span>
-        <h2>${lastStory.title}</h2>
-        <p class="muted">${lastChapter.title}</p>
+      <aside class="panel quick-panel">
+        <span class="eyebrow">Đang đọc</span>
+        <h2>${lastChapter.title}</h2>
+        <p class="muted">${lastStory.title}</p>
         <div class="metrics-grid">
           <div class="metric"><span class="muted">Xu</span><strong>${state.user.coins}</strong></div>
-          <div class="metric"><span class="muted">VIP</span><strong>${isVip() ? "Co" : "Chua"}</strong></div>
-          <div class="metric"><span class="muted">Mo khoa</span><strong>${Object.keys(state.unlocked).length}</strong></div>
+          <div class="metric"><span class="muted">VIP</span><strong>${isVip() ? "Có" : "Chưa"}</strong></div>
+          <div class="metric"><span class="muted">Đã mở</span><strong>${Object.keys(state.unlocked).length}</strong></div>
         </div>
       </aside>
     </section>
 
     <div class="section-head">
       <div>
-        <span class="eyebrow">Truyen moi cap nhat</span>
-        <h2>De doc va de ban goi VIP</h2>
+        <span class="eyebrow">Thư viện</span>
+        <h2>Truyện trong repo content</h2>
       </div>
-      <a class="btn btn-secondary" href="#/library">Tat ca truyen</a>
+      <a class="btn btn-secondary" href="#/library">Xem tất cả</a>
     </div>
     <section class="story-grid">${stories.map(storyCard).join("")}</section>
 
     <div class="section-head">
       <div>
-        <span class="eyebrow">Payment</span>
-        <h2>Goi charge phi de test</h2>
+        <span class="eyebrow">Gói đọc thử</span>
+        <h2>Nạp xu hoặc mở VIP</h2>
       </div>
     </div>
     <section class="plans-grid">${plans.map(planCard).join("")}</section>
@@ -173,11 +203,11 @@ function renderHome() {
 function planCard(plan) {
   return `
     <article class="payment-card">
-      <span class="eyebrow">${plan.type === "vip" ? "VIP" : "Nap xu"}</span>
+      <span class="eyebrow">${plan.type === "vip" ? "VIP" : "Nạp xu"}</span>
       <h3>${plan.title}</h3>
       <strong>${money(plan.price)}</strong>
       <p class="muted">${plan.description}</p>
-      <button class="btn btn-primary" data-open-checkout="${plan.id}">Thanh toan</button>
+      <button class="btn btn-primary" data-open-checkout="${plan.id}">Thanh toán</button>
     </article>
   `;
 }
@@ -192,18 +222,26 @@ function renderLibrary() {
   els.view.innerHTML = `
     <div class="page-title">
       <div>
-        <span class="eyebrow">Thu vien</span>
-        <h1>Truyen dang ban</h1>
+        <span class="eyebrow">Thư viện</span>
+        <h1>Truyện đang đăng</h1>
       </div>
-      <button class="btn btn-primary" data-open-checkout="vip_30">Len VIP</button>
+      <button class="btn btn-primary" data-open-checkout="vip_30">Lên VIP</button>
     </div>
-    <section class="story-grid">${filtered.map(storyCard).join("") || emptyState("Khong tim thay truyen phu hop.")}</section>
+    <section class="story-grid">${filtered.map(storyCard).join("") || emptyState("Không tìm thấy truyện phù hợp.")}</section>
   `;
 }
 
 function renderStory(storyId) {
   const story = getStory(storyId);
   if (!story) return renderNotFound();
+
+  const episodes = [...new Set(story.chapters.map((chapter) => getEpisodeTitle(chapter.title)))];
+  const filter = state.chapterFilters[story.id] || { episode: "all", query: "" };
+  const filteredChapters = story.chapters.filter((chapter) => {
+    const episodeMatch = filter.episode === "all" || getEpisodeTitle(chapter.title) === filter.episode;
+    const queryMatch = !filter.query || chapter.title.toLowerCase().includes(filter.query.toLowerCase());
+    return episodeMatch && queryMatch;
+  });
 
   els.view.innerHTML = `
     <section class="story-detail">
@@ -216,15 +254,34 @@ function renderStory(storyId) {
       <div>
         <span class="eyebrow">${story.status}</span>
         <h1>${story.title}</h1>
-        <p class="muted">Tac gia: ${story.author} · ${story.reads.toLocaleString("vi-VN")} luot doc · ${story.rating}/5</p>
+        <p class="muted">Tác giả: ${story.author} · ${story.reads.toLocaleString("vi-VN")} lượt đọc · ${story.rating}/5</p>
         <div class="tags">${story.genre.map((tag) => `<span class="tag">${tag}</span>`).join("")}</div>
         <p>${story.summary}</p>
         <div class="paywall-actions">
-          <a class="btn btn-primary" href="#/read/${story.id}/${story.chapters[0].id}">Doc tu dau</a>
+          <a class="btn btn-primary" href="#/read/${story.id}/${story.chapters[0].id}">Đọc từ đầu</a>
+          <a class="btn btn-secondary" href="#/read/${state.lastRead.storyId}/${state.lastRead.chapterId}">Đọc tiếp</a>
           <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP</button>
         </div>
+
+        <div class="chapter-tools">
+          <label>
+            <span>Tập</span>
+            <select data-episode-filter="${story.id}">
+              <option value="all">Tất cả tập</option>
+              ${episodes.map((episode) => `
+                <option value="${episode}" ${filter.episode === episode ? "selected" : ""}>${episode}</option>
+              `).join("")}
+            </select>
+          </label>
+          <label>
+            <span>Tìm chương</span>
+            <input data-chapter-search="${story.id}" value="${filter.query}" placeholder="Nhập tên chương..." />
+          </label>
+        </div>
+
+        <p class="muted">${filteredChapters.length}/${story.chapters.length} chương đang hiển thị.</p>
         <div class="chapter-list">
-          ${story.chapters.map((chapter) => chapterRow(story.id, chapter)).join("")}
+          ${filteredChapters.map((chapter) => chapterRow(story.id, chapter)).join("") || emptyState("Không có chương phù hợp.")}
         </div>
       </div>
     </section>
@@ -237,10 +294,10 @@ function chapterRow(storyId, chapter) {
     <article class="chapter-row">
       <div>
         <strong>${chapter.title}</strong>
-        <span class="muted">${chapter.free ? "Mien phi" : locked ? `${chapter.price} xu hoac VIP` : "Da mo khoa"}</span>
+        <span class="muted">${chapter.free ? "Miễn phí" : locked ? `${chapter.price} xu hoặc VIP` : "Đã mở khóa"}</span>
       </div>
       <a class="btn ${locked ? "btn-secondary" : "btn-primary"}" href="#/read/${storyId}/${chapter.id}">
-        ${locked ? "Mo khoa" : "Doc"}
+        ${locked ? "Mở khóa" : "Đọc"}
       </a>
     </article>
   `;
@@ -265,23 +322,23 @@ function renderReader(storyId, chapterId) {
   els.view.innerHTML = `
     <article class="reader">
       <div class="reader-toolbar">
-        <a class="btn btn-secondary" href="#/story/${story.id}">Danh sach chuong</a>
+        <a class="btn btn-secondary" href="#/story/${story.id}">Danh sách chương</a>
         <div>
-          <button class="icon-btn" data-reader-size="-1" aria-label="Giam co chu">A-</button>
-          <button class="icon-btn" data-reader-size="1" aria-label="Tang co chu">A+</button>
-          <button class="btn btn-secondary" id="toggleReaderTheme">${state.darkReader ? "Sang" : "Toi"}</button>
+          <button class="icon-btn" data-reader-size="-1" aria-label="Giảm cỡ chữ">A-</button>
+          <button class="icon-btn" data-reader-size="1" aria-label="Tăng cỡ chữ">A+</button>
+          <button class="btn btn-secondary" id="toggleReaderTheme">${state.darkReader ? "Nền sáng" : "Nền tối"}</button>
         </div>
       </div>
       <h1>${chapter.title}</h1>
-      <p class="muted">${story.title} · ${chapter.free ? "Chuong mien phi" : `${chapter.price} xu / VIP`}</p>
+      <p class="muted">${story.title} · ${chapter.free ? "Chương miễn phí" : `${chapter.price} xu / VIP`}</p>
       ${
         readable
           ? `<section class="reader-content">${chapter.body.map((p) => `<p>${p}</p>`).join("")}</section>`
           : paywallBlock(storyId, chapter)
       }
       <div class="reader-toolbar" style="margin-top:18px; position:static">
-        ${prev ? `<a class="btn btn-secondary" href="#/read/${story.id}/${prev.id}">Chuong truoc</a>` : "<span></span>"}
-        ${next ? `<a class="btn btn-primary" href="#/read/${story.id}/${next.id}">Chuong sau</a>` : "<span></span>"}
+        ${prev ? `<a class="btn btn-secondary" href="#/read/${story.id}/${prev.id}">Chương trước</a>` : "<span></span>"}
+        ${next ? `<a class="btn btn-primary" href="#/read/${story.id}/${next.id}">Chương sau</a>` : "<span></span>"}
       </div>
     </article>
   `;
@@ -290,13 +347,13 @@ function renderReader(storyId, chapterId) {
 function paywallBlock(storyId, chapter) {
   return `
     <section class="paywall">
-      <span class="eyebrow">Chuong khoa</span>
+      <span class="eyebrow">Chương khóa</span>
       <h2>${chapter.title}</h2>
-      <p>Chuong nay can ${chapter.price} xu hoac goi VIP 30 ngay. Ban dang co ${state.user.coins} xu.</p>
+      <p>Chương này cần ${chapter.price} xu hoặc gói VIP 30 ngày. Bạn đang có ${state.user.coins} xu.</p>
       <div class="paywall-actions">
-        <button class="btn btn-primary" data-unlock-chapter="${storyId}:${chapter.id}">Mo bang ${chapter.price} xu</button>
+        <button class="btn btn-primary" data-unlock-chapter="${storyId}:${chapter.id}">Mở bằng ${chapter.price} xu</button>
         <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP</button>
-        <button class="btn btn-secondary" data-open-checkout="coins_50">Nap xu</button>
+        <button class="btn btn-secondary" data-open-checkout="coins_50">Nạp xu</button>
       </div>
     </section>
   `;
@@ -306,22 +363,22 @@ function renderWallet() {
   els.view.innerHTML = `
     <div class="page-title">
       <div>
-        <span class="eyebrow">Vi doc gia</span>
-        <h1>Nap xu va VIP</h1>
+        <span class="eyebrow">Ví độc giả</span>
+        <h1>Nạp xu và VIP</h1>
       </div>
-      <span class="status-chip ${isVip() ? "vip" : ""}">${isVip() ? "Dang VIP" : "Tai khoan free"}</span>
+      <span class="status-chip ${isVip() ? "vip" : ""}">${isVip() ? "Đang VIP" : "Tài khoản thường"}</span>
     </div>
     <section class="plans-grid">${plans.map(planCard).join("")}</section>
-    <div class="section-head"><h2>Lich su giao dich</h2></div>
+    <div class="section-head"><h2>Lịch sử giao dịch</h2></div>
     ${transactionTable()}
   `;
 }
 
 function transactionTable() {
-  if (!state.transactions.length) return emptyState("Chua co giao dich nao.");
+  if (!state.transactions.length) return emptyState("Chưa có giao dịch nào.");
   return `
     <table class="admin-table">
-      <thead><tr><th>Thoi gian</th><th>Noi dung</th><th>Loai</th><th>Gia tri</th></tr></thead>
+      <thead><tr><th>Thời gian</th><th>Nội dung</th><th>Loại</th><th>Giá trị</th></tr></thead>
       <tbody>
         ${state.transactions.map((tx) => `
           <tr>
@@ -342,18 +399,18 @@ function renderAdmin() {
     <div class="page-title">
       <div>
         <span class="eyebrow">Admin demo</span>
-        <h1>Van hanh noi dung</h1>
+        <h1>Vận hành nội dung</h1>
       </div>
       <button class="btn btn-danger" id="resetDemo">Reset demo</button>
     </div>
     <section class="metrics-grid">
-      <div class="metric"><span class="muted">Tong truyen</span><strong>${stories.length}</strong></div>
-      <div class="metric"><span class="muted">Chuong khoa</span><strong>${totalLocked}</strong></div>
-      <div class="metric"><span class="muted">Giao dich</span><strong>${state.transactions.length}</strong></div>
+      <div class="metric"><span class="muted">Tổng truyện</span><strong>${stories.length}</strong></div>
+      <div class="metric"><span class="muted">Chương khóa</span><strong>${totalLocked}</strong></div>
+      <div class="metric"><span class="muted">Giao dịch</span><strong>${state.transactions.length}</strong></div>
     </section>
-    <div class="section-head"><h2>Bang truyen</h2></div>
+    <div class="section-head"><h2>Bảng truyện</h2></div>
     <table class="admin-table">
-      <thead><tr><th>Truyen</th><th>Tac gia</th><th>Chuong</th><th>Trang thai</th><th>Cap nhat</th></tr></thead>
+      <thead><tr><th>Truyện</th><th>Tác giả</th><th>Chương</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
       <tbody>
         ${stories.map((story) => `
           <tr>
@@ -374,16 +431,16 @@ function openCheckout(planId) {
   if (!plan) return;
   const orderCode = `DTV${Date.now().toString().slice(-8)}`;
   els.checkout.innerHTML = `
-    <span class="eyebrow">payOS / VietQR mock</span>
+    <span class="eyebrow">payOS / VietQR demo</span>
     <h2 id="checkoutTitle">${plan.title}</h2>
     <p class="muted">${plan.description}</p>
-    <div class="qr-box" aria-label="Ma QR thanh toan demo"><span>${orderCode}</span></div>
-    <p><strong>So tien:</strong> ${money(plan.price)}</p>
-    <p><strong>Noi dung:</strong> ${orderCode} ${plan.id}</p>
-    <p class="muted">Ban that se goi API payOS de tao payment link/QR va dung webhook de kich hoat goi sau khi thanh toan.</p>
+    <div class="qr-box" aria-label="Mã QR thanh toán demo"><span>${orderCode}</span></div>
+    <p><strong>Số tiền:</strong> ${money(plan.price)}</p>
+    <p><strong>Nội dung:</strong> ${orderCode} ${plan.id}</p>
+    <p class="muted">Bản thật sẽ gọi API payOS để tạo payment link/QR và dùng webhook để kích hoạt gói sau khi thanh toán.</p>
     <div class="paywall-actions">
-      <button class="btn btn-primary" data-confirm-payment="${plan.id}">Mo phong da thanh toan</button>
-      <button class="btn btn-secondary" id="copyOrderCode">Copy ma don</button>
+      <button class="btn btn-primary" data-confirm-payment="${plan.id}">Mô phỏng đã thanh toán</button>
+      <button class="btn btn-secondary" id="copyOrderCode">Copy mã đơn</button>
     </div>
   `;
   els.modal.hidden = false;
@@ -401,14 +458,14 @@ function confirmPayment(planId) {
   }
   state.transactions.unshift({
     id: crypto.randomUUID(),
-    type: plan.type,
+    type: plan.type === "vip" ? "VIP" : "Nạp xu",
     title: plan.title,
     amount: plan.price,
     createdAt: new Date().toISOString()
   });
   saveState();
   els.modal.hidden = true;
-  toast(`Da kich hoat ${plan.title}.`);
+  toast(`Đã kích hoạt ${plan.title}.`);
   route();
 }
 
@@ -417,7 +474,7 @@ function emptyState(text) {
 }
 
 function renderNotFound() {
-  els.view.innerHTML = emptyState("Khong tim thay trang nay.");
+  els.view.innerHTML = emptyState("Không tìm thấy trang này.");
 }
 
 function toast(message) {
@@ -473,14 +530,44 @@ document.addEventListener("click", (event) => {
   if (event.target.id === "resetDemo") {
     localStorage.removeItem(storageKey);
     state = loadState();
-    toast("Da reset du lieu demo.");
+    toast("Đã reset dữ liệu demo.");
     route();
   }
 
   if (event.target.id === "copyOrderCode") {
     const text = els.checkout.querySelector(".qr-box span")?.textContent || "";
     navigator.clipboard?.writeText(text);
-    toast("Da copy ma don demo.");
+    toast("Đã copy mã đơn demo.");
+  }
+});
+
+document.addEventListener("change", (event) => {
+  const episodeSelect = event.target.closest("[data-episode-filter]");
+  if (!episodeSelect) return;
+  const storyId = episodeSelect.dataset.episodeFilter;
+  state.chapterFilters[storyId] = {
+    ...(state.chapterFilters[storyId] || { query: "" }),
+    episode: episodeSelect.value
+  };
+  saveState();
+  renderStory(storyId);
+});
+
+document.addEventListener("input", (event) => {
+  const chapterSearch = event.target.closest("[data-chapter-search]");
+  if (!chapterSearch) return;
+  const storyId = chapterSearch.dataset.chapterSearch;
+  state.chapterFilters[storyId] = {
+    ...(state.chapterFilters[storyId] || { episode: "all" }),
+    query: chapterSearch.value
+  };
+  const cursor = chapterSearch.selectionStart || chapterSearch.value.length;
+  saveState();
+  renderStory(storyId);
+  const nextInput = document.querySelector(`[data-chapter-search="${storyId}"]`);
+  if (nextInput) {
+    nextInput.focus();
+    nextInput.setSelectionRange(cursor, cursor);
   }
 });
 
