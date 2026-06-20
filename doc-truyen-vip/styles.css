@@ -662,6 +662,24 @@ a {
   transition: width 240ms ease;
 }
 
+.audio-seek {
+  display: grid;
+  gap: 8px;
+}
+
+.audio-seek span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.audio-seek input {
+  width: 100%;
+  accent-color: var(--green);
+  cursor: pointer;
+}
+
 .audio-actions {
   display: flex;
   flex-wrap: wrap;

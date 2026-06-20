@@ -1,4 +1,5 @@
 .deps/
 .python-packages/
+doc-truyen-vip/audio/.chunks/
 **/__pycache__/
 *.pyc

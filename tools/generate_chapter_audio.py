@@ -2,13 +2,17 @@ import argparse
 import asyncio
 import json
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
 DATA_JS = Path("doc-truyen-vip/data.js")
 OUT_DIR = Path("doc-truyen-vip/audio")
 DEFAULT_VOICE = "vi-VN-HoaiMyNeural"
+MAX_CHARS = 900
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -31,9 +35,100 @@ def chapter_text(chapter):
     return "\n\n".join(paragraphs)
 
 
+def chapter_chunks(chapter, max_chars=MAX_CHARS):
+    chunks = []
+    current = ""
+    for paragraph in [str(item).strip() for item in chapter.get("body", []) if str(item).strip()]:
+        if len(paragraph) > max_chars:
+            sentences = re.split(r"(?<=[.!?。！？…])\s+", paragraph)
+        else:
+            sentences = [paragraph]
+        for part in sentences:
+            part = part.strip()
+            if not part:
+                continue
+            candidate = f"{current}\n\n{part}" if current else part
+            if len(candidate) > max_chars and current:
+                chunks.append(current)
+                current = part
+            else:
+                current = candidate
+    if current:
+        chunks.append(current)
+    return chunks
+
+
 async def generate_mp3(edge_tts, text, voice, output):
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(str(output))
+
+
+def concat_mp3(parts, output):
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        output.write_bytes(b"".join(part.read_bytes() for part in parts))
+        return
+
+    list_path = output.with_suffix(".concat.txt")
+    list_path.write_text(
+        "\n".join(f"file '{part.resolve().as_posix()}'" for part in parts),
+        encoding="utf-8",
+    )
+    cmd = [
+        ffmpeg,
+        "-y",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        str(list_path),
+        "-c",
+        "copy",
+        str(output),
+    ]
+    subprocess.run(cmd, check=True)
+    list_path.unlink(missing_ok=True)
+
+
+async def generate_part(edge_tts, text, voice, part, retries):
+    for attempt in range(1, retries + 1):
+        try:
+            await generate_mp3(edge_tts, text, voice, part)
+            if part.exists() and part.stat().st_size >= 1024:
+                return
+        except Exception as exc:
+            log(f"    attempt {attempt}/{retries} failed: {exc}")
+        if part.exists() and part.stat().st_size < 1024:
+            part.unlink()
+        await asyncio.sleep(2 * attempt)
+    raise RuntimeError(f"Could not generate audio part: {part}")
+
+
+async def generate_chapter_mp3(edge_tts, chapter, voice, output, overwrite=False, max_chars=MAX_CHARS, retries=3):
+    chunks = chapter_chunks(chapter, max_chars=max_chars)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temp_dir = output.parent / ".chunks" / chapter["id"]
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    parts = []
+    for index, text in enumerate(chunks, start=1):
+        part = temp_dir / f"part-{index:03d}.mp3"
+        if part.exists() and part.stat().st_size >= 1024 and not overwrite:
+            log(f"  skip part {index}/{len(chunks)}")
+        else:
+            log(f"  part {index}/{len(chunks)}")
+            await generate_part(edge_tts, text, voice, part, retries)
+        parts.append(part)
+    temp_output = output.with_suffix(".tmp.mp3")
+    if temp_output.exists():
+        temp_output.unlink()
+    concat_mp3(parts, temp_output)
+    if not temp_output.exists() or temp_output.stat().st_size < 1024:
+        raise RuntimeError(f"Generated output is too small: {temp_output}")
+    temp_output.replace(output)
 
 
 async def main():
@@ -42,6 +137,8 @@ async def main():
     parser.add_argument("--all", action="store_true", help="Generate every chapter.")
     parser.add_argument("--limit", type=int, default=0, help="Generate at most N chapters.")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help="Edge TTS voice name.")
+    parser.add_argument("--max-chars", type=int, default=MAX_CHARS, help="Maximum characters per TTS chunk.")
+    parser.add_argument("--retries", type=int, default=3, help="Retries per TTS chunk.")
     parser.add_argument("--overwrite", action="store_true", help="Regenerate existing MP3 files.")
     args = parser.parse_args()
 
@@ -73,9 +170,16 @@ async def main():
         if output.exists() and not args.overwrite:
             log(f"skip {chapter_id}: {output}")
         else:
-            text = chapter_text(chapter)
             log(f"generate {chapter_id}: {chapter['title']}")
-            await generate_mp3(edge_tts, text, args.voice, output)
+            await generate_chapter_mp3(
+                edge_tts,
+                chapter,
+                args.voice,
+                output,
+                overwrite=args.overwrite,
+                max_chars=args.max_chars,
+                retries=args.retries,
+            )
         manifest.append(
             {
                 "storyId": story["id"],

@@ -137,8 +137,30 @@ function audioPercent() {
 function updateAudioProgress(percent = audioPercent(), label = `${percent}%`) {
   const fill = document.querySelector("[data-audio-progress]");
   const text = document.querySelector("[data-audio-progress-text]");
+  const seek = document.querySelector("[data-audio-seek]");
   if (fill) fill.style.width = `${percent}%`;
   if (text) text.textContent = label;
+  if (seek && document.activeElement !== seek) seek.value = String(percent);
+}
+
+function seekSpeechPercent(percent) {
+  if (!speechState.chunks.length) {
+    updateAudioProgress(percent, `${percent}%`);
+    return;
+  }
+  const speech = getSpeech();
+  const target = Math.min(
+    speechState.chunks.length - 1,
+    Math.max(0, Math.floor((percent / 100) * speechState.chunks.length))
+  );
+  speechState.index = target;
+  speechState.chunkProgress = 0;
+  updateAudioProgress(audioPercent());
+  updateAudioStatus(`Đã tua tới đoạn ${target + 1}/${speechState.chunks.length}.`);
+  if (speechState.playing && !speechState.paused && speech) {
+    speech.cancel();
+    setTimeout(speakNextChunk, 80);
+  }
 }
 
 function speakNextChunk() {
@@ -667,6 +689,10 @@ function renderAudioPanel(story, chapter, readable) {
       <div class="audio-progress" aria-label="Tiến trình nghe">
         <span data-audio-progress style="width:0%"></span>
       </div>
+      <label class="audio-seek">
+        <span>Tua audio</span>
+        <input type="range" min="0" max="100" value="0" step="1" data-audio-seek />
+      </label>
       <div class="audio-actions">
         <button class="btn btn-primary" data-speak-chapter="${story.id}:${chapter.id}">Nghe chương</button>
         <button class="btn btn-secondary" data-pause-speech>Tạm dừng / tiếp tục</button>
@@ -976,6 +1002,13 @@ document.addEventListener("change", (event) => {
 });
 
 document.addEventListener("input", (event) => {
+  const audioSeek = event.target.closest("[data-audio-seek]");
+  if (audioSeek) {
+    const percent = Number(audioSeek.value) || 0;
+    updateAudioProgress(percent, `${percent}%`);
+    return;
+  }
+
   const chapterSearch = event.target.closest("[data-chapter-search]");
   if (!chapterSearch) return;
   const storyId = chapterSearch.dataset.chapterSearch;
@@ -991,6 +1024,12 @@ document.addEventListener("input", (event) => {
     nextInput.focus();
     nextInput.setSelectionRange(cursor, cursor);
   }
+});
+
+document.addEventListener("change", (event) => {
+  const audioSeek = event.target.closest("[data-audio-seek]");
+  if (!audioSeek) return;
+  seekSpeechPercent(Number(audioSeek.value) || 0);
 });
 
 els.closeCheckout.addEventListener("click", () => {

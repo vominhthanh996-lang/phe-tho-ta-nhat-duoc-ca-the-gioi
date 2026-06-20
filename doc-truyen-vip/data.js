@@ -2043,7 +2043,8 @@ window.STORY_DATA = {
             "Trong ánh sáng yếu của đèn mỡ, dấu Hắc Nha trên đó giống một con mắt đen nhỏ.",
             "Nó chưa nhìn thấy họ.",
             "Nhưng sớm muộn gì cũng sẽ."
-          ]
+          ],
+          "audioUrl": "audio/c005.mp3"
         },
         {
           "id": "c006",
