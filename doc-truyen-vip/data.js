@@ -2045,7 +2045,11 @@ window.STORY_DATA = {
             "Nhưng sớm muộn gì cũng sẽ."
           ],
           "audioUrls": {
-            "nu-cam-xuc": "audio/c005.mp3"
+            "nu-cam-xuc": "audio/c005.mp3",
+            "nam-tram": "audio/c005-nam-tram.mp3",
+            "nu-cham-am": "audio/c005-nu-cham-am.mp3",
+            "nam-cang-thang": "audio/c005-nam-cang-thang.mp3",
+            "nu-nhe-nhang": "audio/c005-nu-nhe-nhang.mp3"
           },
           "audioUrl": "audio/c005.mp3"
         },
