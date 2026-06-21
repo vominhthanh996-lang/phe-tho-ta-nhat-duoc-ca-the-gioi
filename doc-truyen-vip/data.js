@@ -48,7 +48,7 @@ window.STORY_DATA = {
       "chapters": [
         {
           "id": "c001",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 1: Hộp Thịt Trong Túi Người Chết",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 1: Hộp Thịt Trong Túi Người Chết",
           "free": true,
           "price": 0,
           "body": [
@@ -385,7 +385,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c002",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 2: Người Đàn Ông Không Đứng Dậy Được",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 2: Người Đàn Ông Không Đứng Dậy Được",
           "free": true,
           "price": 0,
           "body": [
@@ -845,7 +845,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c003",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 3: Bữa Cơm Đầu Tiên",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 3: Bữa Cơm Đầu Tiên",
           "free": true,
           "price": 0,
           "body": [
@@ -1279,7 +1279,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c004",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 4: Chó Hai Hàm Trở Lại",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 4: Chó Hai Hàm Trở Lại",
           "free": true,
           "price": 0,
           "body": [
@@ -1685,7 +1685,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c005",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 5: Viên Tinh Thạch Trong Bùn Đen",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 5: Viên Tinh Thạch Trong Bùn Đen",
           "free": true,
           "price": 0,
           "body": [
@@ -2045,17 +2045,17 @@ window.STORY_DATA = {
             "Nhưng sớm muộn gì cũng sẽ."
           ],
           "audioUrls": {
-            "nu-cam-xuc": "audio/c005.mp3",
-            "nam-tram": "audio/c005-nam-tram.mp3",
-            "nu-cham-am": "audio/c005-nu-cham-am.mp3",
-            "nam-cang-thang": "audio/c005-nam-cang-thang.mp3",
-            "nu-nhe-nhang": "audio/c005-nu-nhe-nhang.mp3"
+            "nu-cam-xuc": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005.mp3",
+            "nam-tram": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005-nam-tram.mp3",
+            "nu-cham-am": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005-nu-cham-am.mp3",
+            "nam-cang-thang": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005-nam-cang-thang.mp3",
+            "nu-nhe-nhang": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005-nu-nhe-nhang.mp3"
           },
-          "audioUrl": "audio/c005.mp3"
+          "audioUrl": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c005.mp3"
         },
         {
           "id": "c006",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 6: Người Trong Khu 17",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 6: Người Trong Khu 17",
           "free": false,
           "price": 8,
           "body": [
@@ -2345,7 +2345,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c007",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 7: Đám Cướp La Kiêu",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 7: Đám Cướp La Kiêu",
           "free": false,
           "price": 8,
           "body": [
@@ -2653,7 +2653,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c008",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 8: Lợn Giáp Bùn Và Muỗng Dầu Đầu Tiên",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 8: Lợn Giáp Bùn Và Muỗng Dầu Đầu Tiên",
           "free": false,
           "price": 8,
           "body": [
@@ -2947,7 +2947,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c009",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 9: Cái Giá Của Lòng Tốt",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 9: Cái Giá Của Lòng Tốt",
           "free": false,
           "price": 8,
           "body": [
@@ -3508,7 +3508,7 @@ window.STORY_DATA = {
         },
         {
           "id": "c010",
-          "title": "Tập 01: Khu 17 Ngoai Thanh - Phần 10: Đêm Khu 17 Cháy",
+          "title": "Tập 01: Khu 17 Ngoại Thành - Phần 10: Đêm Khu 17 Cháy",
           "free": false,
           "price": 8,
           "body": [

@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path("phe-tho-ta-nhat-duoc-ca-the-gioi")
 OUT = Path("doc-truyen-vip/data.js")
 AUDIO_DIR = Path("doc-truyen-vip/audio")
+AUDIO_PUBLIC_BASE = "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio"
 AUDIO_PRESETS = [
     ("nu-cam-xuc", ""),
     ("nam-tram", "-nam-tram"),
@@ -13,6 +14,9 @@ AUDIO_PRESETS = [
     ("nam-cang-thang", "-nam-cang-thang"),
     ("nu-nhe-nhang", "-nu-nhe-nhang"),
 ]
+TITLE_OVERRIDES = {
+    "khu-17-ngoai-thanh": "Khu 17 Ngoại Thành",
+}
 
 
 def natural_key(path: Path):
@@ -21,6 +25,8 @@ def natural_key(path: Path):
 
 def clean_title(slug: str) -> str:
     slug = re.sub(r"^(tap|phan)-\d+-?", "", slug)
+    if slug in TITLE_OVERRIDES:
+        return TITLE_OVERRIDES[slug]
     return " ".join(word.capitalize() for word in slug.replace("-", " ").split())
 
 
@@ -69,7 +75,7 @@ def build():
         for preset_id, suffix in AUDIO_PRESETS:
             audio_path = AUDIO_DIR / f"{chapter_id}{suffix}.mp3"
             if audio_path.exists():
-                audio_urls[preset_id] = f"audio/{chapter_id}{suffix}.mp3"
+                audio_urls[preset_id] = f"{AUDIO_PUBLIC_BASE}/{chapter_id}{suffix}.mp3"
         if audio_urls:
             chapter["audioUrls"] = audio_urls
             if "nu-cam-xuc" in audio_urls:
