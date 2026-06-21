@@ -584,9 +584,6 @@ a {
 }
 
 .reader-toolbar {
-  position: sticky;
-  z-index: 10;
-  top: 88px;
   flex-wrap: wrap;
   padding: 12px;
   margin: 18px 0 22px;
@@ -594,6 +591,36 @@ a {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
+}
+
+.reader-settings,
+.reader-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.reader-nav {
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.reader-nav span {
+  display: none;
+}
+
+.reader-nav-top {
+  margin-left: auto;
+}
+
+.reader-nav-bottom,
+.audio-chapter-nav {
+  margin-top: 18px;
+  justify-content: space-between;
+}
+
+.audio-chapter-nav {
+  margin-top: 2px;
 }
 
 .reader h1 {

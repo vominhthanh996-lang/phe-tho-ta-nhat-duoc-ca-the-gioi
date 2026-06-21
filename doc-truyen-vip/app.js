@@ -761,7 +761,16 @@ function chapterRow(storyId, chapter) {
   `;
 }
 
-function renderAudioPanel(story, chapter, readable) {
+function renderChapterNav(story, prev, next, extraClass = "") {
+  return `
+    <nav class="reader-nav ${extraClass}" aria-label="Chuyển chương">
+      ${prev ? `<a class="btn btn-secondary" href="#/read/${story.id}/${prev.id}">Chương trước</a>` : "<span></span>"}
+      ${next ? `<a class="btn btn-primary" href="#/read/${story.id}/${next.id}" data-audio-next>Chương sau</a>` : "<span></span>"}
+    </nav>
+  `;
+}
+
+function renderAudioPanel(story, chapter, readable, prev, next) {
   if (!readable) return "";
   const voiceId = selectedAudioVoice();
   const speed = selectedAudioSpeed();
@@ -812,6 +821,7 @@ function renderAudioPanel(story, chapter, readable) {
         <button class="btn btn-secondary" data-pause-speech>Tạm dừng / tiếp tục</button>
         <button class="btn btn-secondary" data-stop-speech>Dừng</button>
       </div>
+      ${renderChapterNav(story, prev, next, "audio-chapter-nav")}
       <p class="audio-status"><span data-audio-status>${audioUrl ? "Sẵn sàng phát MP3 gen sẵn." : "Chưa có MP3 cho preset này."}</span> <strong data-audio-progress-text>0%</strong></p>
     </section>
   `;
@@ -840,7 +850,8 @@ function renderReader(storyId, chapterId) {
       <p class="muted reader-meta">${escapeHtml(story.title)} · ${chapter.free ? "Chương miễn phí" : `${chapter.price} xu / VIP`}</p>
       <div class="reader-toolbar">
         <a class="btn btn-secondary" href="#/story/${story.id}">Danh sách chương</a>
-        <div>
+        ${renderChapterNav(story, prev, next, "reader-nav-top")}
+        <div class="reader-settings">
           <button class="icon-btn" data-reader-size="-1" aria-label="Giảm cỡ chữ">A-</button>
           <button class="icon-btn" data-reader-size="1" aria-label="Tăng cỡ chữ">A+</button>
           <button class="btn btn-secondary" id="toggleReaderTheme">${state.darkReader ? "Nền sáng" : "Nền tối"}</button>
@@ -848,13 +859,10 @@ function renderReader(storyId, chapterId) {
       </div>
       ${
         readable
-          ? `${renderAudioPanel(story, chapter, readable)}<section class="reader-content">${chapter.body.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}</section>`
+          ? `${renderAudioPanel(story, chapter, readable, prev, next)}<section class="reader-content">${chapter.body.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}</section>`
           : paywallBlock(storyId, chapter)
       }
-      <div class="reader-toolbar" style="margin-top:18px; position:static">
-        ${prev ? `<a class="btn btn-secondary" href="#/read/${story.id}/${prev.id}">Chương trước</a>` : "<span></span>"}
-        ${next ? `<a class="btn btn-primary" href="#/read/${story.id}/${next.id}">Chương sau</a>` : "<span></span>"}
-      </div>
+      ${renderChapterNav(story, prev, next, "reader-nav-bottom")}
       ${renderComments(story.id, chapter.id)}
     </article>
   `;
@@ -1220,7 +1228,8 @@ document.addEventListener("ended", (event) => {
   const audio = event.target.closest?.("[data-generated-audio]");
   if (!audio) return;
   updateAudioProgress(100, "100%");
-  updateAudioStatus("Đã nghe hết MP3.");
+  const nextLink = document.querySelector("[data-audio-next]");
+  updateAudioStatus(nextLink ? "Đã nghe hết MP3. Bấm Chương sau để nghe tiếp." : "Đã nghe hết MP3.");
 }, true);
 
 document.addEventListener("play", (event) => {
