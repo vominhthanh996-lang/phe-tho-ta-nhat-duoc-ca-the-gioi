@@ -31,6 +31,9 @@ let speechState = {
   playing: false,
   paused: false
 };
+let isAudioSeeking = false;
+let audioWasPlayingBeforeSeek = false;
+let audioProgressFrame = 0;
 const supabaseConfig = window.SUPABASE_CONFIG || {};
 const sharedCommentsEnabled = Boolean(
   supabaseConfig.url &&
@@ -161,7 +164,15 @@ function updateAudioProgress(percent = audioPercent(), label = `${percent}%`) {
   const seek = document.querySelector("[data-audio-seek]");
   if (fill) fill.style.width = `${percent}%`;
   if (text) text.textContent = label;
-  if (seek && document.activeElement !== seek) seek.value = String(percent);
+  if (seek && !isAudioSeeking && document.activeElement !== seek) seek.value = String(percent);
+}
+
+function formatAudioTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds < 0) seconds = 0;
+  const rounded = Math.floor(seconds);
+  const minutes = Math.floor(rounded / 60);
+  const rest = String(rounded % 60).padStart(2, "0");
+  return `${minutes}:${rest}`;
 }
 
 function seekSpeechPercent(percent) {
@@ -279,8 +290,35 @@ function currentGeneratedAudio() {
 
 function updateGeneratedAudioProgress(audio) {
   if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
-  const percent = Math.min(100, Math.max(0, Math.round((audio.currentTime / audio.duration) * 100)));
-  updateAudioProgress(percent, `${percent}%`);
+  const percent = Math.min(100, Math.max(0, (audio.currentTime / audio.duration) * 100));
+  updateAudioProgress(percent, `${Math.round(percent)}%`);
+  updateAudioStatus(`Đang ở ${formatAudioTime(audio.currentTime)} / ${formatAudioTime(audio.duration)}.`);
+}
+
+function startAudioProgressLoop(audio) {
+  cancelAnimationFrame(audioProgressFrame);
+  const tick = () => {
+    if (!isAudioSeeking) updateGeneratedAudioProgress(audio);
+    if (!audio.paused && !audio.ended) {
+      audioProgressFrame = requestAnimationFrame(tick);
+    }
+  };
+  audioProgressFrame = requestAnimationFrame(tick);
+}
+
+function seekGeneratedAudioToPercent(percent, resumeAfterSeek = true) {
+  const audio = currentGeneratedAudio();
+  if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return false;
+  const target = Math.min(audio.duration, Math.max(0, (percent / 100) * audio.duration));
+  audio.currentTime = target;
+  updateGeneratedAudioProgress(audio);
+  updateAudioStatus(`Đã tua tới ${formatAudioTime(target)} / ${formatAudioTime(audio.duration)}.`);
+  if (resumeAfterSeek && audioWasPlayingBeforeSeek) {
+    audio.play()
+      .then(() => startAudioProgressLoop(audio))
+      .catch(() => updateAudioStatus("Đã tua xong. Bấm play để phát tiếp."));
+  }
+  return true;
 }
 
 function playAudioForChapter(storyId, chapter) {
@@ -291,6 +329,7 @@ function playAudioForChapter(storyId, chapter) {
     audio.play()
       .then(() => {
         updateAudioStatus(`Đang phát MP3 gen sẵn ở tốc độ ${selectedAudioSpeed()}x.`);
+        startAudioProgressLoop(audio);
       })
       .catch(() => {
         updateAudioStatus("Trình duyệt chặn autoplay. Bấm trực tiếp nút play trên player MP3.");
@@ -766,7 +805,7 @@ function renderAudioPanel(story, chapter, readable) {
       </div>
       <label class="audio-seek">
         <span>Tua audio</span>
-        <input type="range" min="0" max="100" value="0" step="1" data-audio-seek />
+        <input type="range" min="0" max="100" value="0" step="0.1" data-audio-seek />
       </label>
       <div class="audio-actions">
         <button class="btn btn-primary" data-speak-chapter="${story.id}:${chapter.id}">Nghe chương</button>
@@ -1083,8 +1122,9 @@ document.addEventListener("input", (event) => {
     const percent = Number(audioSeek.value) || 0;
     const audio = currentGeneratedAudio();
     if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
-      audio.currentTime = (percent / 100) * audio.duration;
-      updateGeneratedAudioProgress(audio);
+      const target = (percent / 100) * audio.duration;
+      updateAudioProgress(percent, `${Math.round(percent)}%`);
+      updateAudioStatus(`Tua tới ${formatAudioTime(target)} / ${formatAudioTime(audio.duration)}. Thả ra để phát từ đây.`);
       return;
     }
     updateAudioProgress(percent, `${percent}%`);
@@ -1133,19 +1173,40 @@ document.addEventListener("change", (event) => {
 
   const audioSeek = event.target.closest("[data-audio-seek]");
   if (!audioSeek) return;
-  const audio = currentGeneratedAudio();
-  if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
-    audio.currentTime = ((Number(audioSeek.value) || 0) / 100) * audio.duration;
-    updateGeneratedAudioProgress(audio);
+  if (seekGeneratedAudioToPercent(Number(audioSeek.value) || 0, true)) {
+    isAudioSeeking = false;
     return;
   }
   seekSpeechPercent(Number(audioSeek.value) || 0);
 });
 
+document.addEventListener("pointerdown", (event) => {
+  const audioSeek = event.target.closest("[data-audio-seek]");
+  if (!audioSeek) return;
+  const audio = currentGeneratedAudio();
+  if (!audio) return;
+  isAudioSeeking = true;
+  audioWasPlayingBeforeSeek = !audio.paused && !audio.ended;
+  if (audioWasPlayingBeforeSeek) audio.pause();
+});
+
+document.addEventListener("pointerup", (event) => {
+  const audioSeek = event.target.closest("[data-audio-seek]");
+  if (!audioSeek || !isAudioSeeking) return;
+  seekGeneratedAudioToPercent(Number(audioSeek.value) || 0, true);
+  isAudioSeeking = false;
+});
+
+document.addEventListener("keyup", (event) => {
+  const audioSeek = event.target.closest("[data-audio-seek]");
+  if (!audioSeek || !["ArrowLeft", "ArrowRight", "Home", "End", "Enter", " "].includes(event.key)) return;
+  seekGeneratedAudioToPercent(Number(audioSeek.value) || 0, true);
+});
+
 document.addEventListener("timeupdate", (event) => {
   const audio = event.target.closest?.("[data-generated-audio]");
   if (!audio) return;
-  updateGeneratedAudioProgress(audio);
+  if (!isAudioSeeking) updateGeneratedAudioProgress(audio);
 }, true);
 
 document.addEventListener("loadedmetadata", (event) => {
@@ -1168,11 +1229,12 @@ document.addEventListener("play", (event) => {
   stopSpeech();
   audio.playbackRate = selectedAudioSpeed();
   updateAudioStatus(`Đang phát MP3 gen sẵn ở tốc độ ${selectedAudioSpeed()}x.`);
+  startAudioProgressLoop(audio);
 }, true);
 
 document.addEventListener("pause", (event) => {
   const audio = event.target.closest?.("[data-generated-audio]");
-  if (!audio || audio.ended) return;
+  if (!audio || audio.ended || isAudioSeeking) return;
   updateAudioStatus("Đã tạm dừng MP3.");
 }, true);
 
