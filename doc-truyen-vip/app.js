@@ -397,7 +397,7 @@ function chapterKey(storyId, chapterId) {
 }
 
 function canRead(storyId, chapter) {
-  return chapter.free || isVip() || Boolean(state.unlocked[chapterKey(storyId, chapter.id)]);
+  return true;
 }
 
 function commentKey(storyId, chapterId = "story") {
@@ -570,34 +570,14 @@ function getStoryProgress(story) {
 
 function unlockChapter(storyId, chapter) {
   if (canRead(storyId, chapter)) return true;
-  if (state.user.coins < chapter.price) {
-    toast("Không đủ xu. Nạp thêm xu hoặc mua VIP để mở chương.");
-    openCheckout("coins_50");
-    return false;
-  }
-
-  state.user.coins -= chapter.price;
-  state.unlocked[chapterKey(storyId, chapter.id)] = true;
-  state.transactions.unshift({
-    id: crypto.randomUUID(),
-    type: "Mở chương",
-    title: `Mở khóa ${chapter.title}`,
-    amount: -chapter.price,
-    createdAt: new Date().toISOString()
-  });
-  saveState();
-  toast(`Đã dùng ${chapter.price} xu để mở chương.`);
+  toast("Chương này hiện được mở miễn phí.");
   return true;
 }
 
 function renderAccount() {
-  const vipText = isVip()
-    ? `VIP đến ${new Date(state.user.vipUntil).toLocaleDateString("vi-VN")}`
-    : "Tài khoản thường";
   els.account.innerHTML = `
-    <span class="status-chip ${isVip() ? "vip" : ""}">${vipText}</span>
-    <span class="status-chip">${state.user.coins} xu</span>
-    <button class="btn btn-primary" data-open-checkout="coins_50">Nạp xu</button>
+    <span class="status-chip vip">Đọc miễn phí</span>
+    <a class="btn btn-primary" href="#/library">Chọn truyện</a>
   `;
 }
 
@@ -612,7 +592,6 @@ function setActiveNav(route) {
 }
 
 function storyCard(story) {
-  const lockedCount = story.chapters.filter((chapter) => !chapter.free).length;
   const progress = getStoryProgress(story);
   return `
     <article class="story-card">
@@ -624,11 +603,11 @@ function storyCard(story) {
         <h3>${story.title}</h3>
         <div class="story-meta">${story.author} · ${story.reads.toLocaleString("vi-VN")} lượt đọc · ${story.rating}/5</div>
         <p>${story.summary}</p>
-        <div class="progress-bar" aria-label="Tiến độ mở khóa">
+        <div class="progress-bar" aria-label="Tiến độ đọc miễn phí">
           <span style="width:${progress}%"></span>
         </div>
         <div class="card-footer">
-          <span class="muted">${story.chapters.length} chương · ${lockedCount} chương VIP</span>
+          <span class="muted">${story.chapters.length} chương · đọc miễn phí</span>
           <a class="btn btn-secondary" href="#/story/${story.id}">Xem truyện</a>
         </div>
       </div>
@@ -647,7 +626,7 @@ function renderHome() {
       <div class="hero-main">
         <span class="eyebrow">Truyện phế thổ đang đăng</span>
         <h1>Phế Thổ: Ta Nhặt Được Cả Thế Giới</h1>
-        <p>Thư viện đọc truyện tiếng Việt có dấu, tối ưu cho đọc dài, lưu chương đang đọc và mở khóa chương VIP bằng xu hoặc gói tháng.</p>
+        <p>Thư viện đọc truyện tiếng Việt có dấu, tối ưu cho đọc dài, có phần nghe audio và lưu chương đang đọc. Hiện tại toàn bộ chương được mở miễn phí.</p>
         <div class="hero-kpis">
           <span>${lastStory.chapters.length} chương</span>
           <span>${lastStory.reads.toLocaleString("vi-VN")} lượt đọc</span>
@@ -656,7 +635,6 @@ function renderHome() {
         <div class="hero-actions">
           <a class="btn btn-primary" href="#/read/${lastStory.id}/${lastChapter.id}">Đọc tiếp</a>
           <a class="btn btn-secondary" href="#/story/${lastStory.id}">Danh sách chương</a>
-          <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP 30 ngày</button>
         </div>
       </div>
       <aside class="panel quick-panel">
@@ -668,9 +646,9 @@ function renderHome() {
           <strong>${lastChapter.title}</strong>
         </a>
         <div class="metrics-grid">
-          <div class="metric"><span class="muted">Xu</span><strong>${state.user.coins}</strong></div>
-          <div class="metric"><span class="muted">VIP</span><strong>${isVip() ? "Có" : "Chưa"}</strong></div>
-          <div class="metric"><span class="muted">Đã mở</span><strong>${Object.keys(state.unlocked).length}</strong></div>
+          <div class="metric"><span class="muted">Trạng thái</span><strong>Free</strong></div>
+          <div class="metric"><span class="muted">Audio</span><strong>5 giọng</strong></div>
+          <div class="metric"><span class="muted">Bình luận</span><strong>Có</strong></div>
         </div>
       </aside>
     </section>
@@ -686,18 +664,25 @@ function renderHome() {
 
     <div class="section-head">
       <div>
-        <span class="eyebrow">Gói đọc thử</span>
-        <h2>Nạp xu hoặc mở VIP</h2>
+        <span class="eyebrow">Trạng thái đọc</span>
+        <h2>Đọc miễn phí</h2>
       </div>
     </div>
-    <section class="plans-grid">${plans.map(planCard).join("")}</section>
+    <section class="plans-grid">
+      <article class="payment-card">
+        <span class="eyebrow">Truyện 2K</span>
+        <h3>Đọc tự do</h3>
+        <p>Thanh toán tạm thời đã tắt. Người đọc có thể vào từng chương để đọc và nghe audio ngay.</p>
+        <a class="btn btn-primary" href="#/library">Vào thư viện</a>
+      </article>
+    </section>
   `;
 }
 
 function planCard(plan) {
   return `
     <article class="payment-card">
-      <span class="eyebrow">${plan.type === "vip" ? "VIP" : "Nạp xu"}</span>
+      <span class="eyebrow">Gói đọc</span>
       <h3>${plan.title}</h3>
       <strong>${money(plan.price)}</strong>
       <p class="muted">${plan.description}</p>
@@ -719,7 +704,7 @@ function renderLibrary() {
         <span class="eyebrow">Thư viện</span>
         <h1>Truyện đang đăng</h1>
       </div>
-      <button class="btn btn-primary" data-open-checkout="vip_30">Lên VIP</button>
+      <span class="status-chip vip">Tất cả chương miễn phí</span>
     </div>
     <section class="story-grid">${filtered.map(storyCard).join("") || emptyState("Không tìm thấy truyện phù hợp.")}</section>
   `;
@@ -754,7 +739,7 @@ function renderStory(storyId) {
         <div class="paywall-actions">
           <a class="btn btn-primary" href="#/read/${story.id}/${story.chapters[0].id}">Đọc từ đầu</a>
           <a class="btn btn-secondary" href="#/read/${state.lastRead.storyId}/${state.lastRead.chapterId}">Đọc tiếp</a>
-          <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP</button>
+          <a class="btn btn-secondary" href="#/library">Xem thư viện</a>
         </div>
 
         <div class="chapter-tools">
@@ -784,15 +769,14 @@ function renderStory(storyId) {
 }
 
 function chapterRow(storyId, chapter) {
-  const locked = !canRead(storyId, chapter);
   return `
     <article class="chapter-row">
       <div>
         <strong>${chapter.title}</strong>
-        <span class="muted">${chapter.free ? "Miễn phí" : locked ? `${chapter.price} xu hoặc VIP` : "Đã mở khóa"}</span>
+        <span class="muted">Miễn phí</span>
       </div>
-      <a class="btn ${locked ? "btn-secondary" : "btn-primary"}" href="#/read/${storyId}/${chapter.id}">
-        ${locked ? "Mở khóa" : "Đọc"}
+      <a class="btn btn-primary" href="#/read/${storyId}/${chapter.id}">
+        Đọc
       </a>
     </article>
   `;
@@ -884,7 +868,7 @@ function renderReader(storyId, chapterId) {
   els.view.innerHTML = `
     <article class="reader">
       <h1>${escapeHtml(chapter.title)}</h1>
-      <p class="muted reader-meta">${escapeHtml(story.title)} · ${chapter.free ? "Chương miễn phí" : `${chapter.price} xu / VIP`}</p>
+      <p class="muted reader-meta">${escapeHtml(story.title)} · Chương miễn phí</p>
       <div class="reader-toolbar">
         <a class="btn btn-secondary" href="#/story/${story.id}">Danh sách chương</a>
         ${renderChapterNav(story, prev, next, "reader-nav-top")}
@@ -909,13 +893,12 @@ function renderReader(storyId, chapterId) {
 function paywallBlock(storyId, chapter) {
   return `
     <section class="paywall">
-      <span class="eyebrow">Chương khóa</span>
+      <span class="eyebrow">Đọc miễn phí</span>
       <h2>${chapter.title}</h2>
-      <p>Chương này cần ${chapter.price} xu hoặc gói VIP 30 ngày. Bạn đang có ${state.user.coins} xu.</p>
+      <p>Chương này đã được mở miễn phí. Tải lại trang nếu bạn vẫn thấy thông báo cũ.</p>
       <div class="paywall-actions">
-        <button class="btn btn-primary" data-unlock-chapter="${storyId}:${chapter.id}">Mở bằng ${chapter.price} xu</button>
-        <button class="btn btn-secondary" data-open-checkout="vip_30">Mua VIP</button>
-        <button class="btn btn-secondary" data-open-checkout="coins_50">Nạp xu</button>
+        <a class="btn btn-primary" href="#/read/${storyId}/${chapter.id}">Đọc chương</a>
+        <a class="btn btn-secondary" href="#/library">Về thư viện</a>
       </div>
     </section>
   `;
@@ -925,14 +908,19 @@ function renderWallet() {
   els.view.innerHTML = `
     <div class="page-title">
       <div>
-        <span class="eyebrow">Ví độc giả</span>
-        <h1>Nạp xu và VIP</h1>
+        <span class="eyebrow">Đọc miễn phí</span>
+        <h1>Thanh toán đang tạm tắt</h1>
       </div>
-      <span class="status-chip ${isVip() ? "vip" : ""}">${isVip() ? "Đang VIP" : "Tài khoản thường"}</span>
+      <span class="status-chip vip">Tất cả chương miễn phí</span>
     </div>
-    <section class="plans-grid">${plans.map(planCard).join("")}</section>
-    <div class="section-head"><h2>Lịch sử giao dịch</h2></div>
-    ${transactionTable()}
+    <section class="plans-grid">
+      <article class="payment-card">
+        <span class="eyebrow">Truyện 2K</span>
+        <h3>Không cần nạp xu</h3>
+        <p>Giai đoạn này site mở free cho độc giả đọc và nghe truyện trước.</p>
+        <a class="btn btn-primary" href="#/library">Vào thư viện</a>
+      </article>
+    </section>
   `;
 }
 
@@ -956,7 +944,7 @@ function transactionTable() {
 }
 
 function renderAdmin() {
-  const totalLocked = stories.flatMap((story) => story.chapters).filter((chapter) => !chapter.free).length;
+  const totalFree = stories.flatMap((story) => story.chapters).filter((chapter) => chapter.free).length;
   els.view.innerHTML = `
     <div class="page-title">
       <div>
@@ -967,7 +955,7 @@ function renderAdmin() {
     </div>
     <section class="metrics-grid">
       <div class="metric"><span class="muted">Tổng truyện</span><strong>${stories.length}</strong></div>
-      <div class="metric"><span class="muted">Chương khóa</span><strong>${totalLocked}</strong></div>
+      <div class="metric"><span class="muted">Chương miễn phí</span><strong>${totalFree}</strong></div>
       <div class="metric"><span class="muted">Giao dịch</span><strong>${state.transactions.length}</strong></div>
     </section>
     <div class="section-head"><h2>Bảng truyện</h2></div>
@@ -990,7 +978,10 @@ function renderAdmin() {
 
 function openCheckout(planId) {
   const plan = plans.find((item) => item.id === planId);
-  if (!plan) return;
+  if (!plan) {
+    toast("Thanh toán đang tạm tắt. Hiện tất cả chương đều đọc miễn phí.");
+    return;
+  }
   const orderCode = `DTV${Date.now().toString().slice(-8)}`;
   els.checkout.innerHTML = `
     <span class="eyebrow">VietQR / payOS</span>
@@ -1020,7 +1011,7 @@ function confirmPayment(planId) {
   }
   state.transactions.unshift({
     id: crypto.randomUUID(),
-    type: plan.type === "vip" ? "VIP" : "Nạp xu",
+    type: "Thanh toán",
     title: plan.title,
     amount: plan.price,
     createdAt: new Date().toISOString()
@@ -1059,7 +1050,7 @@ function route() {
   else if (routeName === "library") renderLibrary();
   else if (routeName === "story") renderStory(id);
   else if (routeName === "read") renderReader(id, chapterId);
-  else if (routeName === "wallet") renderWallet();
+  else if (routeName === "wallet") renderLibrary();
   else if (routeName === "admin") renderAdmin();
   else renderNotFound();
   hydrateVisibleComments();

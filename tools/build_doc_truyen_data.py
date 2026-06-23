@@ -92,8 +92,8 @@ def build():
         chapter = {
             "id": chapter_id,
             "title": f"Tập {tap_no:02d}: {tap_title} - {phan_title}",
-            "free": idx <= 5,
-            "price": 0 if idx <= 5 else 8,
+            "free": True,
+            "price": 0,
             "body": markdown_blocks(text),
         }
         audio_urls = {}
@@ -109,35 +109,7 @@ def build():
         chapters.append(chapter)
 
     data = {
-        "plans": [
-            {
-                "id": "vip_30",
-                "type": "vip",
-                "title": "VIP 30 ngày",
-                "price": 49000,
-                "coins": 0,
-                "days": 30,
-                "description": "Đọc toàn bộ chương khóa trong 30 ngày.",
-            },
-            {
-                "id": "coins_50",
-                "type": "coins",
-                "title": "Gói 50 xu",
-                "price": 50000,
-                "coins": 50,
-                "days": 0,
-                "description": "Dùng để mở từng chương VIP.",
-            },
-            {
-                "id": "coins_120",
-                "type": "coins",
-                "title": "Gói 120 xu",
-                "price": 100000,
-                "coins": 120,
-                "days": 0,
-                "description": "Tiết kiệm hơn cho độc giả đọc dài kỳ.",
-            },
-        ],
+        "plans": [],
         "stories": [
             {
                 "id": "phe-tho-ta-nhat-duoc-ca-the-gioi",
