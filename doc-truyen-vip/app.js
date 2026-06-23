@@ -916,7 +916,7 @@ function renderWallet() {
     <section class="plans-grid">
       <article class="payment-card">
         <span class="eyebrow">Truyện 2K</span>
-        <h3>Không cần nạp xu</h3>
+        <h3>Không cần thanh toán</h3>
         <p>Giai đoạn này site mở free cho độc giả đọc và nghe truyện trước.</p>
         <a class="btn btn-primary" href="#/library">Vào thư viện</a>
       </article>
