@@ -11,9 +11,6 @@ MANIFEST = AUDIO_DIR / "verified-audio.json"
 PRESETS = {
     "nu-cam-xuc": "",
     "nam-tram": "-nam-tram",
-    "nu-cham-am": "-nu-cham-am",
-    "nam-cang-thang": "-nam-cang-thang",
-    "nu-nhe-nhang": "-nu-nhe-nhang",
 }
 
 
@@ -73,7 +70,7 @@ def verify_file(chapter_id, preset, min_size, min_duration):
         "file": path.name,
         "size": size,
         "duration": duration,
-        "provider": "fpt",
+        "provider": "edge",
         "verified": True,
         "verifiedAt": datetime.now(timezone.utc).isoformat(),
     }

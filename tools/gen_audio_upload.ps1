@@ -3,8 +3,8 @@ param(
   [switch]$All,
   [int]$Limit = 0,
   [string[]]$Preset = @("nu-cam-xuc"),
-  [ValidateSet("fpt", "video", "direct")]
-  [string]$Engine = "fpt",
+  [ValidateSet("video", "direct")]
+  [string]$Engine = "video",
   [switch]$Overwrite,
   [switch]$Upload,
   [string]$Message = ""
@@ -16,7 +16,7 @@ if (-not $All -and (-not $Chapter -or $Chapter.Count -eq 0)) {
   throw "Dùng -Chapter c001 hoặc -All."
 }
 
-$validPresets = @("nu-cam-xuc", "nam-tram", "nu-cham-am", "nam-cang-thang", "nu-nhe-nhang")
+$validPresets = @("nu-cam-xuc", "nam-tram")
 if ($Preset.Count -eq 1 -and $Preset[0] -eq "all") {
   $Preset = $validPresets
 }

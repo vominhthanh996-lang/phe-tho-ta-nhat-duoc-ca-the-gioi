@@ -1,6 +1,6 @@
 # Truyện 2K MVP
 
-Static MVP cho web đọc truyện thu phí ở Việt Nam.
+Static MVP cho web đọc truyện miễn phí ở Việt Nam.
 
 ## Cách chạy
 
@@ -21,7 +21,7 @@ Các bước khi đã có domain:
 - Trang chủ, thư viện, trang chi tiết truyện, reader mode.
 - Tất cả chương đang mở miễn phí.
 - Reader tiếng Việt rõ dấu trên desktop/mobile, có nền sáng/nền tối.
-- Mỗi chương có khu vực nghe audio: chỉ phát khi có MP3 FPT đã verify, để tránh giả 5 giọng bằng Web Speech/Edge.
+- Mỗi chương có khu vực nghe audio: dùng 2 giọng Edge tiếng Việt miễn phí thật là Hoài My và Nam Minh.
 - Bình luận ở trang truyện và từng chương.
 - Nếu đã cấu hình Supabase, bình luận sẽ đồng bộ chung cho mọi độc giả.
 - Lưu chương đang đọc và tuỳ chọn reader/audio bằng `localStorage`.
@@ -43,32 +43,27 @@ window.SUPABASE_CONFIG = {
 
 Khi hai giá trị này có thật, web sẽ dùng Supabase REST API để đọc/ghi bình luận chung.
 
-## Tạo Audio FPT Cho Chương
+## Tạo Audio Edge Cho Chương
 
-Hiện Edge/Web Speech chỉ có 2 giọng Việt thật, nên không dùng để giả 5 giọng. Muốn tạo 5 giọng khác nhau cần FPT.AI và biến môi trường `FPT_API_KEY` hoặc `FPT_AI_API_KEY`.
+Edge hiện có 2 giọng Việt thật, miễn phí và không cần API key:
 
-Năm preset đang map vào 5 voice FPT khác nhau:
-
-- `nu-cam-xuc`: Ban Mai - nữ miền Bắc.
-- `nam-tram`: Lê Minh - nam miền Bắc.
-- `nu-cham-am`: Mỹ An - nữ miền Trung.
-- `nam-cang-thang`: Gia Huy - nam miền Trung.
-- `nu-nhe-nhang`: Lan Nhi - nữ miền Nam.
+- `nu-cam-xuc`: Hoài My - nữ Việt.
+- `nam-tram`: Nam Minh - nam Việt.
 
 Gen 1 chương 1 giọng:
 
 ```powershell
-python tools/generate_chapter_audio.py --chapter c001 --preset nu-cam-xuc --engine fpt --overwrite
+python tools/generate_chapter_audio.py --chapter c001 --preset nu-cam-xuc --engine video --overwrite
 python tools/build_doc_truyen_data.py
 ```
 
-Tạo toàn bộ chương đủ 5 giọng sẽ rất lâu và tạo nhiều file MP3. Nên test 1 chương trước:
+Tạo chương 1 đủ 2 giọng và upload lên GitHub Pages:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset all -Engine fpt -Overwrite -Upload -Message "Upload c001 FPT audio"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset all -Engine video -Overwrite -Upload -Message "Upload c001 Edge audio"
 ```
 
-File MP3 chỉ được web gắn vào `data.js` sau khi verify và có `provider: "fpt"` trong `doc-truyen-vip/audio/verified-audio.json`.
+File MP3 chỉ được web gắn vào `data.js` sau khi verify và có `provider: "edge"` trong `doc-truyen-vip/audio/verified-audio.json`.
 
 ## Gen Audio Và Upload Một Lệnh
 
@@ -77,19 +72,19 @@ Luồng an toàn mới là: gen MP3 dưới máy, verify file, rebuild `data.js`
 Gen 1 chương, 1 giọng, chưa upload:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset nu-cam-xuc -Engine fpt -Overwrite
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset nu-cam-xuc -Engine video -Overwrite
 ```
 
-Gen 1 chương đủ 5 giọng và upload lên GitHub Pages:
+Gen 1 chương đủ 2 giọng và upload lên GitHub Pages:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset all -Engine fpt -Overwrite -Upload -Message "Upload c001 FPT audio"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -Chapter c001 -Preset all -Engine video -Overwrite -Upload -Message "Upload c001 Edge audio"
 ```
 
 Gen thử 3 chương đầu, 1 giọng:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -All -Limit 3 -Preset nu-cam-xuc -Engine fpt -Overwrite -Upload
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/gen_audio_upload.ps1 -All -Limit 3 -Preset nu-cam-xuc -Engine video -Overwrite -Upload
 ```
 
 ## Nâng Cấp Lên Bản Thật

@@ -353,7 +353,12 @@ window.STORY_DATA = {
             "Nàng không biết mình có sống nổi qua hôm nay không.",
             "Nhưng nàng biết một chuyện.",
             "Người đã chết một lần, nếu còn muốn sống, thì từ miếng thịt đầu tiên đã không thể quỳ xuống xin."
-          ]
+          ],
+          "audioUrls": {
+            "nu-cam-xuc": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c001.mp3",
+            "nam-tram": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c001-nam-tram.mp3"
+          },
+          "audioUrl": "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio/c001.mp3"
         },
         {
           "id": "c002",

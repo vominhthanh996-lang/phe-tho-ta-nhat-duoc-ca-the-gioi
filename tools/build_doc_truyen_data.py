@@ -8,13 +8,10 @@ OUT = Path("doc-truyen-vip/data.js")
 AUDIO_DIR = Path("doc-truyen-vip/audio")
 AUDIO_VERIFIED = AUDIO_DIR / "verified-audio.json"
 AUDIO_PUBLIC_BASE = "https://raw.githubusercontent.com/vominhthanh996-lang/truyen-2k/main/doc-truyen-vip/audio"
-REQUIRED_AUDIO_PROVIDER = "fpt"
+REQUIRED_AUDIO_PROVIDER = "edge"
 AUDIO_PRESETS = [
     ("nu-cam-xuc", ""),
     ("nam-tram", "-nam-tram"),
-    ("nu-cham-am", "-nu-cham-am"),
-    ("nam-cang-thang", "-nam-cang-thang"),
-    ("nu-nhe-nhang", "-nu-nhe-nhang"),
 ]
 TITLE_OVERRIDES = {
     "khu-17-ngoai-thanh": "Khu 17 Ngoại Thành",

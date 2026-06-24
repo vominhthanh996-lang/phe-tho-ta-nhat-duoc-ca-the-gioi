@@ -1,15 +1,11 @@
 import argparse
 import asyncio
 import json
-import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 
@@ -19,63 +15,25 @@ VERIFIED_AUDIO = OUT_DIR / "verified-audio.json"
 VIDEO_VOICE_SCRIPT = Path("E:/ThanhMV/auto-video-generator/scripts/generate_voice_edge.py")
 DEFAULT_VOICE = "vi-VN-HoaiMyNeural"
 MAX_CHARS = 900
-FPT_API_URL = "https://api.fpt.ai/hmi/tts/v5"
-FPT_REQUIRED_PROVIDER = "fpt"
+EDGE_REQUIRED_PROVIDER = "edge"
 VOICE_PRESETS = {
     "nu-cam-xuc": {
-        "label": "Ban Mai - nữ miền Bắc",
+        "label": "Hoài My - nữ Việt",
         "voice": "vi-VN-HoaiMyNeural",
         "rate": "-6%",
         "pitch": "+0Hz",
         "suffix": "",
         "video_voice": "vi-female",
         "video_style": "story-emotional",
-        "fpt_voice": "banmai",
-        "fpt_speed": "-1",
     },
     "nam-tram": {
-        "label": "Lê Minh - nam miền Bắc",
+        "label": "Nam Minh - nam Việt",
         "voice": "vi-VN-NamMinhNeural",
         "rate": "-8%",
         "pitch": "-4Hz",
         "suffix": "-nam-tram",
         "video_voice": "vi-male",
         "video_style": "wasteland-dark",
-        "fpt_voice": "leminh",
-        "fpt_speed": "-1",
-    },
-    "nu-cham-am": {
-        "label": "Mỹ An - nữ miền Trung",
-        "voice": "vi-VN-HoaiMyNeural",
-        "rate": "-14%",
-        "pitch": "-2Hz",
-        "suffix": "-nu-cham-am",
-        "video_voice": "vi-female",
-        "video_style": "plain",
-        "fpt_voice": "myan",
-        "fpt_speed": "-2",
-    },
-    "nam-cang-thang": {
-        "label": "Gia Huy - nam miền Trung",
-        "voice": "vi-VN-NamMinhNeural",
-        "rate": "+2%",
-        "pitch": "+3Hz",
-        "suffix": "-nam-cang-thang",
-        "video_voice": "vi-male",
-        "video_style": "story-emotional",
-        "fpt_voice": "giahuy",
-        "fpt_speed": "0",
-    },
-    "nu-nhe-nhang": {
-        "label": "Lan Nhi - nữ miền Nam",
-        "voice": "vi-VN-HoaiMyNeural",
-        "rate": "-4%",
-        "pitch": "+4Hz",
-        "suffix": "-nu-nhe-nhang",
-        "video_voice": "vi-female",
-        "video_style": "wasteland-dark",
-        "fpt_voice": "lannhi",
-        "fpt_speed": "-1",
     },
 }
 
@@ -234,86 +192,6 @@ def concat_mp3(parts, output):
     list_path.unlink(missing_ok=True)
 
 
-def fpt_api_key():
-    return os.environ.get("FPT_API_KEY") or os.environ.get("FPT_AI_API_KEY")
-
-
-def request_fpt_tts(text, voice, speed, retries):
-    api_key = fpt_api_key()
-    if not api_key:
-        raise RuntimeError(
-            "Missing FPT_API_KEY. FPT has real Vietnamese voice IDs; Edge only has two Vietnamese voices."
-        )
-    body = text.encode("utf-8")
-    headers = {
-        "api_key": api_key,
-        "voice": voice,
-        "speed": str(speed),
-        "format": "mp3",
-        "Cache-Control": "no-cache",
-        "Content-Type": "text/plain; charset=utf-8",
-    }
-    last_error = None
-    for attempt in range(1, retries + 1):
-        try:
-            request = urllib.request.Request(FPT_API_URL, data=body, headers=headers, method="POST")
-            with urllib.request.urlopen(request, timeout=60) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-            if int(payload.get("error", 1)) != 0:
-                raise RuntimeError(payload.get("message") or payload)
-            audio_url = payload.get("async") or payload.get("message")
-            if not audio_url:
-                raise RuntimeError(f"FPT response has no async audio URL: {payload}")
-            return audio_url
-        except (urllib.error.URLError, TimeoutError, RuntimeError, ValueError) as exc:
-            last_error = exc
-            log(f"    FPT request attempt {attempt}/{retries} failed: {exc}")
-            time.sleep(2 * attempt)
-    raise RuntimeError(f"Could not request FPT TTS: {last_error}")
-
-
-def download_fpt_audio(audio_url, output, retries):
-    last_error = None
-    for attempt in range(1, retries + 1):
-        try:
-            time.sleep(5 if attempt == 1 else min(10, 2 * attempt))
-            request = urllib.request.Request(audio_url, headers={"User-Agent": "Truyen2KAudioGenerator/1.0"})
-            with urllib.request.urlopen(request, timeout=60) as response:
-                data = response.read()
-            if len(data) < 1024:
-                raise RuntimeError(f"downloaded audio too small: {len(data)} bytes")
-            output.write_bytes(data)
-            return
-        except (urllib.error.URLError, TimeoutError, RuntimeError) as exc:
-            last_error = exc
-            log(f"    FPT download attempt {attempt}/{retries} failed: {exc}")
-    raise RuntimeError(f"Could not download FPT audio: {last_error}")
-
-
-def generate_chapter_fpt(chapter, output, preset, overwrite=False, max_chars=4500, retries=6):
-    chunks = chapter_chunks(chapter, max_chars=max_chars)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    temp_dir = output.parent / ".chunks" / f"{chapter['id']}-fpt-{preset['fpt_voice']}"
-    temp_dir.mkdir(parents=True, exist_ok=True)
-    parts = []
-    for index, text in enumerate(chunks, start=1):
-        part = temp_dir / f"part-{index:03d}.mp3"
-        if part.exists() and part.stat().st_size >= 1024 and not overwrite:
-            log(f"  skip FPT part {index}/{len(chunks)}")
-        else:
-            log(f"  FPT part {index}/{len(chunks)} voice={preset['fpt_voice']} speed={preset['fpt_speed']}")
-            audio_url = request_fpt_tts(text, preset["fpt_voice"], preset["fpt_speed"], retries)
-            download_fpt_audio(audio_url, part, retries)
-        parts.append(part)
-    temp_output = output.with_suffix(".tmp.mp3")
-    if temp_output.exists():
-        temp_output.unlink()
-    concat_mp3(parts, temp_output)
-    if not temp_output.exists() or temp_output.stat().st_size < 1024:
-        raise RuntimeError(f"Generated output is too small: {temp_output}")
-    temp_output.replace(output)
-
-
 async def generate_part(edge_tts, text, voice, part, retries, rate, pitch):
     for attempt in range(1, retries + 1):
         try:
@@ -367,7 +245,7 @@ async def main():
     parser.add_argument("--all", action="store_true", help="Generate every chapter.")
     parser.add_argument("--limit", type=int, default=0, help="Generate at most N chapters.")
     parser.add_argument("--preset", choices=sorted(VOICE_PRESETS), default="nu-cam-xuc", help="Narration voice preset.")
-    parser.add_argument("--engine", choices=["fpt", "video", "direct"], default="fpt", help="Use FPT real voices, gen-video Edge pipeline, or direct Edge TTS.")
+    parser.add_argument("--engine", choices=["video", "direct"], default="video", help="Use free Edge voices through gen-video pipeline or direct Edge TTS.")
     parser.add_argument("--voice", default=DEFAULT_VOICE, help="Edge TTS voice name.")
     parser.add_argument("--rate", help="Edge TTS rate, for example -8% or +2%.")
     parser.add_argument("--pitch", help="Edge TTS pitch, for example -4Hz or +3Hz.")
@@ -409,22 +287,13 @@ async def main():
     for story, chapter in chapters:
         chapter_id = chapter["id"]
         output = OUT_DIR / f"{chapter_id}{suffix}.mp3"
-        fpt_verified = is_verified_provider(chapter_id, args.preset, output.name, FPT_REQUIRED_PROVIDER)
-        if output.exists() and not args.overwrite and (args.engine != "fpt" or fpt_verified):
+        edge_verified = is_verified_provider(chapter_id, args.preset, output.name, EDGE_REQUIRED_PROVIDER)
+        if output.exists() and not args.overwrite and edge_verified:
             log(f"skip {chapter_id}: {output}")
         else:
-            force_overwrite = args.overwrite or (args.engine == "fpt" and output.exists() and not fpt_verified)
+            force_overwrite = args.overwrite or (output.exists() and not edge_verified)
             log(f"generate {chapter_id} [{args.preset} / {preset['label']} / engine={args.engine}]: {chapter['title']}")
-            if args.engine == "fpt":
-                generate_chapter_fpt(
-                    chapter,
-                    output,
-                    preset,
-                    overwrite=force_overwrite,
-                    max_chars=max(args.max_chars, 4500),
-                    retries=args.retries,
-                )
-            elif args.engine == "video":
+            if args.engine == "video":
                 generate_with_video_voice(chapter, output, preset, overwrite=force_overwrite)
             else:
                 await generate_chapter_mp3(
