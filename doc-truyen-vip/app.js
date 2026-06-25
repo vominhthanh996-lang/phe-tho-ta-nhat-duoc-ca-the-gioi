@@ -70,6 +70,7 @@ function loadState() {
     darkReader: false,
     audioVoice: "nu-cam-xuc",
     audioSpeed: 1,
+    commenterName: "",
     lastRead: defaultLastRead(),
     chapterFilters: {}
   };
@@ -388,6 +389,20 @@ function getComments(storyId, chapterId = "story") {
   return sharedCommentsEnabled ? remoteComments[key] || [] : state.comments?.[key] || [];
 }
 
+function cleanCommentAuthor(value) {
+  return normalizeText(value)
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 40) || "Độc giả";
+}
+
+function cleanCommentBody(value) {
+  return normalizeText(value)
+    .replace(/\r\n/g, "\n")
+    .trim()
+    .slice(0, 800);
+}
+
 async function supabaseRequest(path, options = {}) {
   const baseUrl = supabaseConfig.url.replace(/\/$/, "");
   const response = await fetch(`${baseUrl}/rest/v1/${path}`, {
@@ -412,7 +427,7 @@ async function supabaseRequest(path, options = {}) {
 async function loadRemoteComments(storyId, chapterId = "story") {
   if (!sharedCommentsEnabled) return;
   const key = commentKey(storyId, chapterId);
-  const query = `comments?target_key=eq.${encodeURIComponent(key)}&select=id,author,body,created_at&order=created_at.desc&limit=50`;
+  const query = `comments?target_key=eq.${encodeURIComponent(key)}&is_hidden=eq.false&select=id,author,body,created_at&order=created_at.desc&limit=50`;
   const rows = await supabaseRequest(query);
   remoteComments[key] = rows.map((row) => ({
     id: row.id,
@@ -423,12 +438,20 @@ async function loadRemoteComments(storyId, chapterId = "story") {
   refreshCommentPanel(storyId, chapterId);
 }
 
-async function addComment(storyId, chapterId, text) {
-  const cleaned = text.trim();
+async function addComment(storyId, chapterId, author, text) {
+  const cleaned = cleanCommentBody(text);
+  const cleanedAuthor = cleanCommentAuthor(author);
   if (!cleaned) {
     toast("Bạn chưa nhập nội dung bình luận.");
     return false;
   }
+  if (cleaned.length < 2) {
+    toast("Bình luận ngắn quá, viết thêm chút nữa nha.");
+    return false;
+  }
+
+  state.commenterName = cleanedAuthor;
+  saveState();
 
   if (sharedCommentsEnabled) {
     const key = commentKey(storyId, chapterId);
@@ -439,8 +462,8 @@ async function addComment(storyId, chapterId, text) {
         target_key: key,
         story_id: storyId,
         chapter_id: chapterId === "story" ? null : chapterId,
-        author: state.user.name || "Độc giả",
-        body: cleaned.slice(0, 800)
+        author: cleanedAuthor,
+        body: cleaned
       })
     });
     await loadRemoteComments(storyId, chapterId);
@@ -453,8 +476,8 @@ async function addComment(storyId, chapterId, text) {
   state.comments[key] = [
     {
       id: crypto.randomUUID(),
-      author: state.user.name || "Độc giả",
-      text: cleaned.slice(0, 800),
+      author: cleanedAuthor,
+      text: cleaned,
       createdAt: new Date().toISOString()
     },
     ...(state.comments[key] || [])
@@ -468,6 +491,7 @@ function renderComments(storyId, chapterId = "story") {
   const comments = getComments(storyId, chapterId);
   const title = chapterId === "story" ? "Bình luận truyện" : "Bình luận chương";
   const targetKey = commentKey(storyId, chapterId);
+  const commenterName = escapeHtml(state.commenterName || "");
   return `
     <section class="comments-panel" data-comments-scope="${targetKey}" data-comments-story="${storyId}" data-comments-chapter="${chapterId}">
       <div class="section-head compact">
@@ -483,17 +507,24 @@ function renderComments(storyId, chapterId = "story") {
           : "Chưa cấu hình Supabase nên bình luận tạm lưu trên trình duyệt này."}
       </p>
       <form class="comment-form" data-comment-form="${storyId}" data-comment-chapter="${chapterId}">
-        <label>
-          <span>Viết bình luận</span>
-          <textarea name="comment" maxlength="800" placeholder="Chia sẻ cảm nghĩ của bạn..."></textarea>
-        </label>
+        <div class="comment-fields">
+          <label>
+            <span>Tên hiển thị</span>
+            <input name="author" maxlength="40" value="${commenterName}" placeholder="Tên của bạn" autocomplete="nickname" />
+          </label>
+          <label>
+            <span>Viết bình luận</span>
+            <textarea name="comment" maxlength="800" placeholder="Chia sẻ cảm nghĩ của bạn..."></textarea>
+          </label>
+        </div>
+        <input class="comment-honeypot" name="website" autocomplete="off" tabindex="-1" aria-hidden="true" />
         <button class="btn btn-primary" type="submit">Gửi bình luận</button>
       </form>
       <div class="comment-list">
         ${comments.map((comment) => `
           <article class="comment-item">
             <div class="comment-meta">
-              <strong>${comment.author}</strong>
+              <strong>${escapeHtml(comment.author)}</strong>
               <span>${new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
             </div>
             <p>${escapeHtml(comment.text)}</p>
@@ -1105,12 +1136,15 @@ document.addEventListener("submit", async (event) => {
   const storyId = form.dataset.commentForm;
   const chapterId = form.dataset.commentChapter || "story";
   const input = form.elements.comment;
+  const authorInput = form.elements.author;
+  if (form.elements.website?.value) return;
   const button = form.querySelector("button[type='submit']");
   button.disabled = true;
   button.textContent = "Đang gửi...";
   try {
-    if (await addComment(storyId, chapterId, input.value)) {
+    if (await addComment(storyId, chapterId, authorInput?.value, input.value)) {
       input.value = "";
+      if (authorInput) authorInput.value = state.commenterName || "";
       if (!sharedCommentsEnabled) {
         if (chapterId === "story") renderStory(storyId);
         else route();

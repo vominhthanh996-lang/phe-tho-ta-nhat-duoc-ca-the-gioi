@@ -490,6 +490,11 @@ a {
   gap: 10px;
 }
 
+.comment-fields {
+  display: grid;
+  gap: 10px;
+}
+
 .comment-mode {
   margin: -4px 0 14px;
   padding: 10px 12px;
@@ -520,16 +525,29 @@ a {
   text-transform: uppercase;
 }
 
+.comment-form input,
 .comment-form textarea {
   width: 100%;
-  min-height: 96px;
-  resize: vertical;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text);
   line-height: 1.55;
+}
+
+.comment-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.comment-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .comment-form button:disabled {
