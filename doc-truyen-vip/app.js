@@ -63,6 +63,18 @@ let authSession = null;
 let authUser = null;
 let userVipUntil = null;
 let pendingEmailOtp = null;
+let isAdminUser = false;
+let adminState = {
+  loading: false,
+  error: "",
+  stories: [],
+  chapters: [],
+  chapterBody: [],
+  comments: [],
+  profiles: [],
+  wallets: [],
+  vip: []
+};
 let accountSummary = {
   wallet: { balance_vnd: 0, coin_balance: 0 },
   progress: [],
@@ -90,7 +102,8 @@ function loadState() {
     audioSpeed: 1,
     commenterName: "",
     lastRead: defaultLastRead(),
-    chapterFilters: {}
+    chapterFilters: {},
+    admin: { storyId: "", chapterId: "" }
   };
 
   try {
@@ -187,6 +200,86 @@ async function loadAccountSummary() {
   if (!txRes.error && txRes.data) accountSummary.transactions = txRes.data;
 }
 
+async function loadAdminStatus() {
+  isAdminUser = false;
+  if (!supabaseClient || !authUser) return false;
+  const { data, error } = await supabaseClient.rpc("is_admin");
+  if (!error) isAdminUser = data === true;
+  return isAdminUser;
+}
+
+function resetAdminState() {
+  adminState = {
+    loading: false,
+    error: "",
+    stories: [],
+    chapters: [],
+    chapterBody: [],
+    comments: [],
+    profiles: [],
+    wallets: [],
+    vip: []
+  };
+}
+
+async function loadAdminData() {
+  resetAdminState();
+  if (!supabaseClient || !authUser || !isAdminUser) return;
+  adminState.loading = true;
+
+  const selectedStoryId = state.admin?.storyId || stories[0]?.id || "";
+  const selectedChapterId = state.admin?.chapterId || "";
+  const [
+    storyRes,
+    chapterRes,
+    bodyRes,
+    commentRes,
+    profileRes,
+    walletRes,
+    vipRes
+  ] = await Promise.all([
+    supabaseClient.from("stories").select("*").order("sort_order", { ascending: true }),
+    selectedStoryId
+      ? supabaseClient.from("story_chapters").select("*").eq("story_id", selectedStoryId).order("sort_order", { ascending: true })
+      : Promise.resolve({ data: [], error: null }),
+    selectedStoryId && selectedChapterId
+      ? supabaseClient.from("story_chapter_bodies").select("body").eq("story_id", selectedStoryId).eq("chapter_id", selectedChapterId).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    supabaseClient.from("comments").select("id,target_key,story_id,chapter_id,author,body,user_email,is_hidden,created_at").order("created_at", { ascending: false }).limit(60),
+    supabaseClient.from("profiles").select("id,email,display_name,updated_at").order("updated_at", { ascending: false }).limit(80),
+    supabaseClient.from("account_wallets").select("user_id,balance_vnd,coin_balance,updated_at"),
+    supabaseClient.from("vip_entitlements").select("user_id,plan_id,active_until,source,created_at").order("active_until", { ascending: false })
+  ]);
+
+  adminState.loading = false;
+  const firstError = [storyRes, chapterRes, bodyRes, commentRes, profileRes, walletRes, vipRes].find((item) => item.error)?.error;
+  if (firstError) {
+    adminState.error = firstError.message || "Không tải được dữ liệu admin.";
+    return;
+  }
+
+  adminState.stories = storyRes.data || [];
+  adminState.chapters = chapterRes.data || [];
+  adminState.chapterBody = Array.isArray(bodyRes.data?.body) ? bodyRes.data.body : [];
+  adminState.comments = commentRes.data || [];
+  adminState.profiles = profileRes.data || [];
+  adminState.wallets = walletRes.data || [];
+  adminState.vip = vipRes.data || [];
+
+  const resolvedChapterId = selectedChapterId || adminState.chapters[0]?.chapter_id || "";
+  state.admin = { storyId: selectedStoryId, chapterId: resolvedChapterId };
+  if (selectedStoryId && resolvedChapterId && !selectedChapterId) {
+    const { data: resolvedBody, error: resolvedBodyError } = await supabaseClient
+      .from("story_chapter_bodies")
+      .select("body")
+      .eq("story_id", selectedStoryId)
+      .eq("chapter_id", resolvedChapterId)
+      .maybeSingle();
+    if (resolvedBodyError) adminState.error = resolvedBodyError.message || "Không tải được nội dung chương.";
+    else adminState.chapterBody = Array.isArray(resolvedBody?.body) ? resolvedBody.body : [];
+  }
+}
+
 async function upsertProfile() {
   if (!supabaseClient || !authUser) return;
   await supabaseClient
@@ -228,6 +321,7 @@ async function initAuth() {
   }
   await loadVipEntitlement();
   await loadAccountSummary();
+  await loadAdminStatus();
   renderAccount();
 
   supabaseClient.auth.onAuthStateChange(async (_event, session) => {
@@ -240,6 +334,7 @@ async function initAuth() {
     }
     await loadVipEntitlement();
     await loadAccountSummary();
+    await loadAdminStatus();
     renderAccount();
     hydrateVisibleComments();
   });
@@ -881,6 +976,7 @@ function renderAccount() {
       <strong>${escapeHtml(accountDisplayName())}</strong>
       <small>${hasAccountVip() ? `VIP còn ${vipDaysLeft()} ngày` : "Tài khoản thường"}</small>
     </a>
+    ${isAdminUser ? `<a class="btn btn-secondary" href="#/admin">Admin</a>` : ""}
     <button class="btn btn-secondary" data-sign-out>Thoát</button>
   `;
 }
@@ -1262,34 +1358,220 @@ function transactionTable() {
   `;
 }
 
-function renderAdmin() {
-  const totalFree = stories.flatMap((story) => story.chapters).filter((chapter) => chapter.free).length;
+async function renderAdmin() {
+  if (!supabaseClient) {
+    els.view.innerHTML = emptyState("Chưa cấu hình Supabase nên không mở được admin.");
+    return;
+  }
+  if (!isLoggedIn()) {
+    els.view.innerHTML = `
+      <div class="page-title">
+        <div>
+          <span class="eyebrow">Quản trị</span>
+          <h1>Đăng nhập tài khoản admin</h1>
+        </div>
+        <button class="btn btn-primary" data-open-auth>Đăng nhập</button>
+      </div>
+      <section class="panel">
+        <p class="muted">Trang này chỉ mở cho account nằm trong bảng admin_users của Supabase.</p>
+      </section>
+    `;
+    return;
+  }
+
+  await loadAdminStatus();
+  if (!isAdminUser) {
+    els.view.innerHTML = `
+      <div class="page-title">
+        <div>
+          <span class="eyebrow">Quản trị</span>
+          <h1>Chưa có quyền admin</h1>
+          <p class="muted">${escapeHtml(accountEmail())}</p>
+        </div>
+        <a class="btn btn-secondary" href="#/account">Về tài khoản</a>
+      </div>
+      <section class="panel">
+        <p class="muted">Cần chạy file ADMIN_SETUP.sql trong Supabase và thêm email này vào admin_users trước.</p>
+      </section>
+    `;
+    return;
+  }
+
+  await loadAdminData();
+  if (adminState.error) {
+    els.view.innerHTML = emptyState(`Không tải được admin: ${adminState.error}`);
+    return;
+  }
+
+  const selectedStoryId = state.admin?.storyId || adminState.stories[0]?.id || "";
+  const selectedChapterId = state.admin?.chapterId || adminState.chapters[0]?.chapter_id || "";
+  state.admin = { storyId: selectedStoryId, chapterId: selectedChapterId };
+  const selectedStory = adminState.stories.find((story) => story.id === selectedStoryId) || adminState.stories[0];
+  const selectedChapter = adminState.chapters.find((chapter) => chapter.chapter_id === selectedChapterId) || adminState.chapters[0];
+  const hiddenComments = adminState.comments.filter((comment) => comment.is_hidden).length;
+
   els.view.innerHTML = `
     <div class="page-title">
       <div>
         <span class="eyebrow">Quản trị</span>
-        <h1>Vận hành nội dung</h1>
+        <h1>Admin Truyện 2K</h1>
+        <p class="muted">Mọi thay đổi lưu thẳng vào Supabase, độc giả không sửa được từ frontend.</p>
       </div>
-      <button class="btn btn-danger" id="resetDemo">Làm mới dữ liệu thử</button>
+      <button class="btn btn-secondary" data-admin-refresh>Làm mới</button>
     </div>
+
     <section class="metrics-grid">
-      <div class="metric"><span class="muted">Tổng truyện</span><strong>${stories.length}</strong></div>
-      <div class="metric"><span class="muted">Chương miễn phí</span><strong>${totalFree}</strong></div>
-      <div class="metric"><span class="muted">Giao dịch</span><strong>${state.transactions.length}</strong></div>
+      <div class="metric"><span class="muted">Truyện</span><strong>${adminState.stories.length}</strong></div>
+      <div class="metric"><span class="muted">Chương đang chọn</span><strong>${adminState.chapters.length}</strong></div>
+      <div class="metric"><span class="muted">Comment gần đây</span><strong>${adminState.comments.length}</strong></div>
+      <div class="metric"><span class="muted">Comment ẩn</span><strong>${hiddenComments}</strong></div>
     </section>
-    <div class="section-head"><h2>Bảng truyện</h2></div>
+
+    <section class="admin-layout">
+      <article class="panel admin-panel">
+        <div class="section-head compact">
+          <div>
+            <span class="eyebrow">Truyện</span>
+            <h2>Thông tin truyện</h2>
+          </div>
+        </div>
+        <label class="admin-field">
+          <span>Chọn truyện</span>
+          <select data-admin-story-select>
+            ${adminState.stories.map((story) => `<option value="${escapeHtml(story.id)}" ${story.id === selectedStoryId ? "selected" : ""}>${escapeHtml(story.title)}</option>`).join("")}
+          </select>
+        </label>
+        ${selectedStory ? renderAdminStoryForm(selectedStory) : emptyState("Chưa có truyện trong database.")}
+      </article>
+
+      <article class="panel admin-panel">
+        <div class="section-head compact">
+          <div>
+            <span class="eyebrow">Chương</span>
+            <h2>Sửa chương</h2>
+          </div>
+        </div>
+        <label class="admin-field">
+          <span>Chọn chương</span>
+          <select data-admin-chapter-select>
+            ${adminState.chapters.map((chapter) => `<option value="${escapeHtml(chapter.chapter_id)}" ${chapter.chapter_id === selectedChapterId ? "selected" : ""}>${escapeHtml(chapter.title)}</option>`).join("")}
+          </select>
+        </label>
+        ${selectedChapter ? renderAdminChapterForm(selectedChapter, adminState.chapterBody) : emptyState("Chưa chọn chương.")}
+      </article>
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="section-head compact">
+        <div>
+          <span class="eyebrow">Bình luận</span>
+          <h2>Comment gần đây</h2>
+        </div>
+      </div>
+      ${renderAdminComments()}
+    </section>
+
+    <section class="panel admin-panel">
+      <div class="section-head compact">
+        <div>
+          <span class="eyebrow">User</span>
+          <h2>Tài khoản và ví xu</h2>
+        </div>
+      </div>
+      ${renderAdminUsers()}
+    </section>
+  `;
+}
+
+function renderAdminStoryForm(story) {
+  return `
+    <form class="admin-form" data-admin-story-form>
+      <input name="id" type="hidden" value="${escapeHtml(story.id)}" />
+      <label><span>Tiêu đề</span><input name="title" value="${escapeHtml(story.title)}" required /></label>
+      <label><span>Tác giả</span><input name="author" value="${escapeHtml(story.author)}" required /></label>
+      <label><span>Trạng thái</span><input name="status" value="${escapeHtml(story.status || "")}" /></label>
+      <label><span>Ngày cập nhật</span><input name="updated_at" type="date" value="${escapeHtml(story.updated_at || "")}" /></label>
+      <label><span>Lượt đọc</span><input name="reads" type="number" min="0" value="${Number(story.reads || 0)}" /></label>
+      <label><span>Rating</span><input name="rating" type="number" min="0" max="5" step="0.1" value="${Number(story.rating || 0)}" /></label>
+      <label class="admin-field-wide"><span>Tóm tắt</span><textarea name="summary" rows="5">${escapeHtml(story.summary || "")}</textarea></label>
+      <label class="admin-check"><input name="is_active" type="checkbox" ${story.is_active ? "checked" : ""} /> <span>Đang hiển thị ngoài web</span></label>
+      <button class="btn btn-primary" type="submit">Lưu truyện</button>
+    </form>
+  `;
+}
+
+function renderAdminChapterForm(chapter, bodyLines) {
+  return `
+    <form class="admin-form" data-admin-chapter-form>
+      <input name="story_id" type="hidden" value="${escapeHtml(chapter.story_id)}" />
+      <input name="chapter_id" type="hidden" value="${escapeHtml(chapter.chapter_id)}" />
+      <label><span>Tiêu đề</span><input name="title" value="${escapeHtml(chapter.title)}" required /></label>
+      <label><span>Tập / cụm chương</span><input name="episode_title" value="${escapeHtml(chapter.episode_title || "")}" /></label>
+      <label><span>Thứ tự</span><input name="sort_order" type="number" value="${Number(chapter.sort_order || 0)}" /></label>
+      <label><span>Giá xu</span><input name="price_coins" type="number" min="0" value="${Number(chapter.price_coins || 0)}" /></label>
+      <label class="admin-field-wide"><span>Audio mặc định</span><input name="audio_url" value="${escapeHtml(chapter.audio_url || "")}" /></label>
+      <label class="admin-field-wide"><span>Audio URLs JSON</span><textarea name="audio_urls" rows="4">${escapeHtml(JSON.stringify(chapter.audio_urls || {}, null, 2))}</textarea></label>
+      <label class="admin-field-wide"><span>Nội dung chương, mỗi dòng là một đoạn</span><textarea name="body" rows="14">${escapeHtml((bodyLines || []).join("\n"))}</textarea></label>
+      <label class="admin-check"><input name="free" type="checkbox" ${chapter.free ? "checked" : ""} /> <span>Miễn phí</span></label>
+      <label class="admin-check"><input name="is_active" type="checkbox" ${chapter.is_active ? "checked" : ""} /> <span>Đang hiển thị ngoài web</span></label>
+      <button class="btn btn-primary" type="submit">Lưu chương</button>
+    </form>
+  `;
+}
+
+function renderAdminComments() {
+  if (!adminState.comments.length) return emptyState("Chưa có bình luận.");
+  return `
     <table class="admin-table">
-      <thead><tr><th>Truyện</th><th>Tác giả</th><th>Chương</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
+      <thead><tr><th>Người gửi</th><th>Nội dung</th><th>Vị trí</th><th>Trạng thái</th><th></th></tr></thead>
       <tbody>
-        ${stories.map((story) => `
+        ${adminState.comments.map((comment) => `
           <tr>
-            <td>${story.title}</td>
-            <td>${story.author}</td>
-            <td>${story.chapters.length}</td>
-            <td>${story.status}</td>
-            <td>${story.updatedAt}</td>
+            <td><strong>${escapeHtml(comment.author)}</strong><br><span class="muted">${escapeHtml(comment.user_email || "")}</span></td>
+            <td>${escapeHtml(comment.body).slice(0, 220)}</td>
+            <td>${escapeHtml(comment.target_key)}<br><span class="muted">${new Date(comment.created_at).toLocaleString("vi-VN")}</span></td>
+            <td>${comment.is_hidden ? "Đã ẩn" : "Đang hiện"}</td>
+            <td class="admin-actions">
+              <button class="btn btn-secondary" data-admin-comment-toggle="${comment.id}" data-hidden="${comment.is_hidden ? "0" : "1"}">${comment.is_hidden ? "Hiện" : "Ẩn"}</button>
+              <button class="btn btn-danger" data-admin-comment-delete="${comment.id}">Xóa</button>
+            </td>
           </tr>
         `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderAdminUsers() {
+  if (!adminState.profiles.length) return emptyState("Chưa có user profile.");
+  return `
+    <table class="admin-table">
+      <thead><tr><th>Email</th><th>Tên</th><th>Xu</th><th>VIP</th><th></th></tr></thead>
+      <tbody>
+        ${adminState.profiles.map((profile) => {
+          const wallet = adminState.wallets.find((item) => item.user_id === profile.id) || {};
+          const vip = adminState.vip.find((item) => item.user_id === profile.id && new Date(item.active_until).getTime() > Date.now()) || {};
+          return `
+            <tr>
+              <td>${escapeHtml(profile.email || profile.id)}</td>
+              <td>${escapeHtml(profile.display_name || "")}</td>
+              <td>
+                <form class="admin-inline-form" data-admin-wallet-form="${profile.id}">
+                  <input name="coin_balance" type="number" min="0" value="${Number(wallet.coin_balance || 0)}" />
+                  <input name="balance_vnd" type="number" min="0" value="${Number(wallet.balance_vnd || 0)}" />
+                  <button class="btn btn-secondary" type="submit">Lưu ví</button>
+                </form>
+              </td>
+              <td>
+                <form class="admin-inline-form" data-admin-vip-form="${profile.id}">
+                  <input name="active_until" type="datetime-local" value="${vip.active_until ? new Date(vip.active_until).toISOString().slice(0, 16) : ""}" />
+                  <button class="btn btn-secondary" type="submit">Lưu VIP</button>
+                </form>
+              </td>
+              <td><span class="muted">${new Date(profile.updated_at || Date.now()).toLocaleString("vi-VN")}</span></td>
+            </tr>
+          `;
+        }).join("")}
       </tbody>
     </table>
   `;
@@ -1576,6 +1858,125 @@ async function signOut() {
   toast("Đã đăng xuất.");
 }
 
+async function saveAdminStory(form) {
+  const values = Object.fromEntries(new FormData(form).entries());
+  const payload = {
+    title: normalizeText(values.title).trim(),
+    author: normalizeText(values.author).trim(),
+    status: normalizeText(values.status).trim() || "Đang ra",
+    updated_at: values.updated_at || null,
+    reads: Number(values.reads || 0),
+    rating: Number(values.rating || 0),
+    summary: normalizeText(values.summary).trim(),
+    is_active: form.elements.is_active.checked,
+    db_updated_at: new Date().toISOString()
+  };
+  const { error } = await supabaseClient.from("stories").update(payload).eq("id", values.id);
+  if (error) throw error;
+  await loadStoryCatalog();
+  toast("Đã lưu truyện.");
+}
+
+function parseJsonField(value, fallback) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return fallback;
+  return JSON.parse(trimmed);
+}
+
+async function saveAdminChapter(form) {
+  const values = Object.fromEntries(new FormData(form).entries());
+  const storyId = values.story_id;
+  const chapterId = values.chapter_id;
+  const bodyLines = normalizeText(values.body)
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const audioUrls = parseJsonField(values.audio_urls, {});
+
+  const chapterPayload = {
+    title: normalizeText(values.title).trim(),
+    episode_title: normalizeText(values.episode_title).trim() || null,
+    sort_order: Number(values.sort_order || 0),
+    free: form.elements.free.checked,
+    price_coins: Number(values.price_coins || 0),
+    audio_url: normalizeText(values.audio_url).trim() || null,
+    audio_urls: audioUrls,
+    is_active: form.elements.is_active.checked,
+    db_updated_at: new Date().toISOString()
+  };
+
+  const { error: chapterError } = await supabaseClient
+    .from("story_chapters")
+    .update(chapterPayload)
+    .eq("story_id", storyId)
+    .eq("chapter_id", chapterId);
+  if (chapterError) throw chapterError;
+
+  const { error: bodyError } = await supabaseClient
+    .from("story_chapter_bodies")
+    .upsert({
+      story_id: storyId,
+      chapter_id: chapterId,
+      body: bodyLines,
+      db_updated_at: new Date().toISOString()
+    }, { onConflict: "story_id,chapter_id" });
+  if (bodyError) throw bodyError;
+
+  authorizedChapterCache.delete(chapterKey(storyId, chapterId));
+  await loadStoryCatalog();
+  toast("Đã lưu chương.");
+}
+
+async function setAdminCommentVisibility(commentId, hidden) {
+  const { error } = await supabaseClient
+    .from("comments")
+    .update({ is_hidden: hidden })
+    .eq("id", commentId);
+  if (error) throw error;
+  toast(hidden ? "Đã ẩn bình luận." : "Đã hiện bình luận.");
+}
+
+async function deleteAdminComment(commentId) {
+  const { error } = await supabaseClient.from("comments").delete().eq("id", commentId);
+  if (error) throw error;
+  toast("Đã xóa bình luận.");
+}
+
+async function saveAdminWallet(form, userId) {
+  const values = Object.fromEntries(new FormData(form).entries());
+  const { error } = await supabaseClient
+    .from("account_wallets")
+    .upsert({
+      user_id: userId,
+      balance_vnd: Number(values.balance_vnd || 0),
+      coin_balance: Number(values.coin_balance || 0),
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+  if (error) throw error;
+  toast("Đã lưu ví user.");
+}
+
+async function saveAdminVip(form, userId) {
+  const values = Object.fromEntries(new FormData(form).entries());
+  if (!values.active_until) {
+    const { error } = await supabaseClient.from("vip_entitlements").delete().eq("user_id", userId).eq("plan_id", "vip");
+    if (error) throw error;
+    toast("Đã tắt VIP user.");
+    return;
+  }
+  const { error } = await supabaseClient
+    .from("vip_entitlements")
+    .upsert({
+      user_id: userId,
+      plan_id: "vip",
+      active_until: new Date(values.active_until).toISOString(),
+      source: "admin",
+      created_at: new Date().toISOString()
+    }, { onConflict: "user_id,plan_id" });
+  if (error) throw error;
+  toast("Đã lưu VIP user.");
+}
+
 function emptyState(text) {
   return `<div class="panel"><p class="muted">${text}</p></div>`;
 }
@@ -1621,7 +2022,7 @@ async function route() {
   else if (routeName === "read") await renderReader(id, chapterId);
   else if (routeName === "account") renderAccountPage();
   else if (routeName === "wallet") renderLibrary();
-  else if (routeName === "admin") renderAdmin();
+  else if (routeName === "admin") await renderAdmin();
   else renderNotFound();
   hydrateVisibleComments();
   els.view.focus({ preventScroll: true });
@@ -1631,6 +2032,38 @@ async function route() {
 document.addEventListener("click", async (event) => {
   if (event.target.closest("[data-open-auth]")) {
     openAuthModal();
+  }
+
+  if (event.target.closest("[data-admin-refresh]")) {
+    event.preventDefault();
+    await renderAdmin();
+  }
+
+  const commentToggle = event.target.closest("[data-admin-comment-toggle]");
+  if (commentToggle) {
+    event.preventDefault();
+    commentToggle.disabled = true;
+    try {
+      await setAdminCommentVisibility(commentToggle.dataset.adminCommentToggle, commentToggle.dataset.hidden === "1");
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa cập nhật được bình luận.");
+      commentToggle.disabled = false;
+    }
+  }
+
+  const commentDelete = event.target.closest("[data-admin-comment-delete]");
+  if (commentDelete) {
+    event.preventDefault();
+    if (!confirm("Xóa bình luận này?")) return;
+    commentDelete.disabled = true;
+    try {
+      await deleteAdminComment(commentDelete.dataset.adminCommentDelete);
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa xóa được bình luận.");
+      commentDelete.disabled = false;
+    }
   }
 
   if (event.target.closest("[data-sign-out]")) {
@@ -1713,6 +2146,66 @@ document.addEventListener("submit", async (event) => {
     return;
   }
 
+  const adminStoryForm = event.target.closest("[data-admin-story-form]");
+  if (adminStoryForm) {
+    event.preventDefault();
+    const button = adminStoryForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    try {
+      await saveAdminStory(adminStoryForm);
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa lưu được truyện.");
+      button.disabled = false;
+    }
+    return;
+  }
+
+  const adminChapterForm = event.target.closest("[data-admin-chapter-form]");
+  if (adminChapterForm) {
+    event.preventDefault();
+    const button = adminChapterForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    try {
+      await saveAdminChapter(adminChapterForm);
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa lưu được chương. Kiểm tra JSON audio URLs.");
+      button.disabled = false;
+    }
+    return;
+  }
+
+  const adminWalletForm = event.target.closest("[data-admin-wallet-form]");
+  if (adminWalletForm) {
+    event.preventDefault();
+    const button = adminWalletForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    try {
+      await saveAdminWallet(adminWalletForm, adminWalletForm.dataset.adminWalletForm);
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa lưu được ví.");
+      button.disabled = false;
+    }
+    return;
+  }
+
+  const adminVipForm = event.target.closest("[data-admin-vip-form]");
+  if (adminVipForm) {
+    event.preventDefault();
+    const button = adminVipForm.querySelector("button[type='submit']");
+    button.disabled = true;
+    try {
+      await saveAdminVip(adminVipForm, adminVipForm.dataset.adminVipForm);
+      await renderAdmin();
+    } catch (error) {
+      toast(error.message || "Chưa lưu được VIP.");
+      button.disabled = false;
+    }
+    return;
+  }
+
   const authForm = event.target.closest("[data-auth-form]");
   if (authForm) {
     event.preventDefault();
@@ -1769,6 +2262,22 @@ document.addEventListener("submit", async (event) => {
 });
 
 document.addEventListener("change", (event) => {
+  const adminStorySelect = event.target.closest("[data-admin-story-select]");
+  if (adminStorySelect) {
+    state.admin = { storyId: adminStorySelect.value, chapterId: "" };
+    saveState();
+    renderAdmin();
+    return;
+  }
+
+  const adminChapterSelect = event.target.closest("[data-admin-chapter-select]");
+  if (adminChapterSelect) {
+    state.admin = { ...(state.admin || {}), chapterId: adminChapterSelect.value };
+    saveState();
+    renderAdmin();
+    return;
+  }
+
   const episodeSelect = event.target.closest("[data-episode-filter]");
   if (!episodeSelect) return;
   const storyId = episodeSelect.dataset.episodeFilter;
