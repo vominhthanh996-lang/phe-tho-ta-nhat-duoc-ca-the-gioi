@@ -5,3 +5,4 @@ doc-truyen-vip/audio/.chunks/
 *.pyc
 supabase-story-content.sql
 supabase-story-content-chunks/
+doc-truyen-vip/data.js
