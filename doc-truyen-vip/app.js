@@ -1,6 +1,5 @@
 const initialStoryData = window.STORY_DATA || { stories: [], plans: [] };
 let stories = initialStoryData.stories || [];
-const plans = initialStoryData.plans || [];
 
 const els = {
   view: document.querySelector("#view"),
@@ -983,18 +982,6 @@ function renderHome() {
   `;
 }
 
-function planCard(plan) {
-  return `
-    <article class="payment-card">
-      <span class="eyebrow">Gói đọc</span>
-      <h3>${plan.title}</h3>
-      <strong>${money(plan.price)}</strong>
-      <p class="muted">${plan.description}</p>
-      <button class="btn btn-primary" data-open-checkout="${plan.id}">Thanh toán</button>
-    </article>
-  `;
-}
-
 function renderLibrary() {
   const query = els.search.value.trim().toLowerCase();
   const filtered = stories.filter((story) => {
@@ -1539,52 +1526,6 @@ async function signOut() {
   toast("Đã đăng xuất.");
 }
 
-function openCheckout(planId) {
-  const plan = plans.find((item) => item.id === planId);
-  if (!plan) {
-    toast("Thanh toán đang tạm tắt. Hiện tất cả chương đều đọc miễn phí.");
-    return;
-  }
-  const orderCode = `DTV${Date.now().toString().slice(-8)}`;
-  els.checkout.innerHTML = `
-    <span class="eyebrow">VietQR / payOS</span>
-    <h2 id="checkoutTitle">${plan.title}</h2>
-    <p class="muted">${plan.description}</p>
-    <div class="qr-box" aria-label="Mã QR thanh toán"><span>${orderCode}</span></div>
-    <p><strong>Số tiền:</strong> ${money(plan.price)}</p>
-    <p><strong>Nội dung:</strong> ${orderCode} ${plan.id}</p>
-    <p class="muted">Cổng thanh toán đang ở chế độ thử nghiệm. Khi nối payOS thật, hệ thống sẽ tự kích hoạt gói sau khi ngân hàng xác nhận.</p>
-    <div class="paywall-actions">
-      <button class="btn btn-primary" data-confirm-payment="${plan.id}">Xác nhận thanh toán thử</button>
-      <button class="btn btn-secondary" id="copyOrderCode">Copy mã đơn</button>
-    </div>
-  `;
-  els.modal.hidden = false;
-}
-
-function confirmPayment(planId) {
-  const plan = plans.find((item) => item.id === planId);
-  if (!plan) return;
-  if (plan.type === "vip") {
-    const base = isVip() ? new Date(state.user.vipUntil) : new Date();
-    base.setDate(base.getDate() + plan.days);
-    state.user.vipUntil = base.toISOString();
-  } else {
-    state.user.coins += plan.coins;
-  }
-  state.transactions.unshift({
-    id: crypto.randomUUID(),
-    type: "Thanh toán",
-    title: plan.title,
-    amount: plan.price,
-    createdAt: new Date().toISOString()
-  });
-  saveState();
-  els.modal.hidden = true;
-  toast(`Đã kích hoạt ${plan.title}.`);
-  route();
-}
-
 function emptyState(text) {
   return `<div class="panel"><p class="muted">${text}</p></div>`;
 }
@@ -1646,12 +1587,6 @@ document.addEventListener("click", async (event) => {
     signOut();
   }
 
-  const checkoutButton = event.target.closest("[data-open-checkout]");
-  if (checkoutButton) openCheckout(checkoutButton.dataset.openCheckout);
-
-  const confirmButton = event.target.closest("[data-confirm-payment]");
-  if (confirmButton) confirmPayment(confirmButton.dataset.confirmPayment);
-
   const unlockButton = event.target.closest("[data-unlock-chapter]");
   if (unlockButton) {
     event.preventDefault();
@@ -1697,11 +1632,6 @@ document.addEventListener("click", async (event) => {
     route();
   }
 
-  if (event.target.id === "copyOrderCode") {
-    const text = els.checkout.querySelector(".qr-box span")?.textContent || "";
-    navigator.clipboard?.writeText(text);
-    toast("Đã copy mã đơn.");
-  }
 });
 
 document.addEventListener("submit", async (event) => {
