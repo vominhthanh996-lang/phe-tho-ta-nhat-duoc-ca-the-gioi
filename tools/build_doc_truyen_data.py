@@ -121,7 +121,7 @@ def build():
                 "author": "ThanhMV",
                 "status": "Đang ra",
                 "genre": ["Phế thổ", "Mạt thế", "Sinh tồn", "Nữ cường"],
-                "cover": "linear-gradient(145deg, #d9f99d, #16a34a 45%, #111827)",
+                "cover": "assets/phe-tho-ta-nhat-duoc-ca-the-gioi-thumb.webp",
                 "summary": (
                     "Một cô gái yếu ớt tỉnh lại giữa phế thổ nhiễm xạ, không hệ thống, "
                     "không dị năng, chỉ có trực giác sinh tồn và ý chí nhặt từng mảnh "

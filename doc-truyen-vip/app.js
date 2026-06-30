@@ -1,5 +1,8 @@
 const initialStoryData = window.STORY_DATA || { stories: [], plans: [] };
 let stories = initialStoryData.stories || [];
+const STORY_THUMBNAILS = {
+  "phe-tho-ta-nhat-duoc-ca-the-gioi": "assets/phe-tho-ta-nhat-duoc-ca-the-gioi-thumb.webp"
+};
 
 const els = {
   view: document.querySelector("#view"),
@@ -362,8 +365,10 @@ function handleAuthRedirectNotice() {
 }
 
 function normalizeCatalogStory(story) {
+  const thumbnail = STORY_THUMBNAILS[story.id];
   return {
     ...story,
+    cover: thumbnail || story.cover,
     genre: Array.isArray(story.genre) ? story.genre : [],
     reads: Number(story.reads || 0),
     rating: Number(story.rating || 0),
@@ -942,6 +947,27 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function cssString(value) {
+  return normalizeText(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'")
+    .replaceAll("\n", "");
+}
+
+function isImageCover(value) {
+  return /^(https?:\/\/|\.?\.?\/|assets\/).+\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i.test(normalizeText(value).trim());
+}
+
+function coverStyle(cover, overlay = "card") {
+  const value = normalizeText(cover).trim();
+  if (!value) return "background:linear-gradient(145deg, #d9f99d, #16a34a 45%, #111827)";
+  if (!isImageCover(value)) return `background:${escapeHtml(value)}`;
+  const shade = overlay === "detail"
+    ? "linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.62))"
+    : "linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.68))";
+  return `background-image:${shade},url('${cssString(value)}');background-size:cover;background-position:center`;
+}
+
 function getEpisodeTitle(chapterTitle) {
   const match = chapterTitle.match(/^(Tập\s+\d+:\s*[^-]+)/i);
   return match ? match[1].trim() : "Chương lẻ";
@@ -1029,9 +1055,10 @@ function setActiveNav(route) {
 
 function storyCard(story) {
   const progress = getStoryProgress(story);
+  const hasImageCover = isImageCover(story.cover);
   return `
     <article class="story-card">
-      <a href="#/story/${story.id}" class="cover" style="background:${story.cover}">
+      <a href="#/story/${story.id}" class="cover ${hasImageCover ? "image-cover" : ""}" style="${coverStyle(story.cover)}">
         <strong>${story.title}</strong>
       </a>
       <div class="story-body">
@@ -1148,7 +1175,7 @@ function renderStory(storyId) {
 
   els.view.innerHTML = `
     <section class="story-detail">
-      <div class="detail-cover" style="background:${story.cover}">
+      <div class="detail-cover" style="${coverStyle(story.cover, "detail")}">
         <div>
           <span class="eyebrow" style="color:#fff">Truyện 2K</span>
           <h1>${story.title}</h1>
