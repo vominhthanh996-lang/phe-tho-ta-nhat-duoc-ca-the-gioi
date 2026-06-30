@@ -1844,6 +1844,21 @@ async function signInWithPassword(email, password) {
   return true;
 }
 
+function authErrorMessage(error) {
+  const code = error?.code || error?.error_code || "";
+  const message = String(error?.message || "").toLowerCase();
+  if (code === "invalid_credentials" || message.includes("invalid login credentials")) {
+    return "Email hoặc mật khẩu không đúng, hoặc tài khoản chưa được tạo/xác nhận.";
+  }
+  if (message.includes("email not confirmed")) {
+    return "Email chưa xác nhận. Dùng nút gửi mã đăng nhập để xác nhận email trước.";
+  }
+  if (message.includes("rate limit")) {
+    return "Gửi mã quá nhanh. Chờ một chút rồi thử lại.";
+  }
+  return "Chưa xử lý được tài khoản. Kiểm tra email/mật khẩu hoặc thử lại sau.";
+}
+
 async function sendEmailOtp(email, displayName, password = "", mode = "signin") {
   if (!supabaseClient) return false;
   const cleanedEmail = String(email || "").trim().toLowerCase();
@@ -2336,8 +2351,8 @@ document.addEventListener("submit", async (event) => {
       if (ok && action === "signin") {
         els.modal.hidden = true;
       }
-    } catch {
-      toast("Chưa xử lý được tài khoản. Kiểm tra email/mật khẩu hoặc thử lại sau.");
+    } catch (error) {
+      toast(authErrorMessage(error));
     } finally {
       button.disabled = false;
       button.textContent = originalLabel;
